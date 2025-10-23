@@ -15,7 +15,7 @@
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Mugiwara Pirates",
-        "Origin": "Shimotsuki Village",
+        "Origin": "East Blue",
         "Appears": "3",
         "Height": "181",
         "Haki": "AOC",
@@ -26,7 +26,7 @@
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Mugiwara Pirates",
-        "Origin": "Cocoyashi Village",
+        "Origin": "East Blue",
         "Appears": "8",
         "Height": "170",
         "Haki": "None",
@@ -59,7 +59,7 @@
         "DevilFruitType": "Zoan",
         "Devilfruit": "Hito Hito no Mi",
         "Org": "Mugiwara Pirates",
-        "Origin": "Drum Island",
+        "Origin": "Grand Line",
         "Appears": "134",
         "Height": "90",
         "Haki": "None",
@@ -140,7 +140,7 @@
         "Appears": "489",
         "Height": "191",
         "Haki": "A",
-        "Bounty": "1000000000"
+        "Bounty": "200000000"
     }, {
         "Name": "X Drake",
         "Sex": "Male",
@@ -290,7 +290,7 @@
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Mero Mero no Mi",
         "Org": "Kuja Pirates",
-        "Origin": "Amazon Lily",
+        "Origin": "Calm Belt",
         "Appears": "516",
         "Height": "191",
         "Haki": "AOC",
@@ -395,7 +395,7 @@
         "Haki": "AO",
         "Bounty": "0"
     }, {
-        "Name": "Coby",
+        "Name": "Koby",
         "Sex": "Male",
         "DevilFruitType": "None",
         "Devilfruit": "None",
@@ -1228,5 +1228,73 @@
         "Height": "179",
         "Haki": "A",
         "Bounty": "100000000"
+    }, {
+        "Name": "Gan Fall",
+        "Sex": "Male",
+        "DevilFruitType": "None",
+        "Devilfruit": "None",
+        "Org": "Skypiea",
+        "Origin": "Skypiea",
+        "Appears": "237",
+        "Height": "180",
+        "Haki": "None",
+        "Bounty": "0"
+    }, {
+        "Name": "Xebec",
+        "Sex": "Male",
+        "DevilFruitType": "None",
+        "Devilfruit": "None",
+        "Org": "Rocks Pirates",
+        "Origin": "West Blue",
+        "Appears": "1154",
+        "Height": "Unknown",
+        "Haki": "C",
+        "Bounty": "Unknown"
+    }, {
+        "Name": "Gloriosa",
+        "Sex": "Female",
+        "DevilFruitType": "None",
+        "Devilfruit": "None",
+        "Org": "Kuja Tribe",
+        "Origin": "Calm Belt",
+        "Appears": "514",
+        "Height": "Unknown",
+        "Haki": "None",
+        "Bounty": "Unknown"
+    }, {
+        "Name": "Kaidou",
+        "Sex": "Male",
+        "DevilFruitType": "Zoan",
+        "Devilfruit": "Uo Uo no Mi Model: Seiryu",
+        "Org": "Beasts Pirates",
+        "Origin": "Grand Line",
+        "Appears": "795",
+        "Height": "710",
+        "Haki": "AOC",
+        "Bounty": "4611100000"
+    }, {
+        "Name": "Caesar Clown",
+        "Sex": "Male",
+        "DevilFruitType": "Logia",
+        "Devilfruit": "Gasu Gasu no Mi",
+        "Org": "NEO MADS",
+        "Origin": "Grand Line",
+        "Appears": "658",
+        "Height": "309",
+        "Haki": "None",
+        "Bounty": "300000000"
+    }, {
+        "Name": "Nojiko",
+        "Sex": "Female",
+        "DevilFruitType": "None",
+        "Devilfruit": "None",
+        "Org": "None",
+        "Origin": "East Blue",
+        "Appears": "70",
+        "Height": "170",
+        "Haki": "None",
+        "Bounty": "0"
     }
+	
+	
 ]

@@ -1,10 +1,10 @@
 import json
 from pathlib import Path
+
 from database import personajes, close_connection
 
+
 def load_json_path():
-    # Path al archivo data/characters.json relativo a la raíz del proyecto
-    # __file__ está en src/, así que parent.parent -> raíz del proyecto
     root = Path(__file__).resolve().parent.parent
     return root / "data" / "characters.json"
 
