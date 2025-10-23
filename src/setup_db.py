@@ -14,6 +14,14 @@ def main():
         print(f"❌ No se encuentra {json_path}")
         return
 
+    # ----------------------------------------------------
+    # PASO CLAVE: BORRAR COLECCIÓN ANTES DE RECARGAR
+    # ----------------------------------------------------
+    print("🗑️ Eliminando la colección 'personajes' para un inicio limpio...")
+    personajes.drop()
+    print("✅ Colección anterior eliminada.")
+    # ----------------------------------------------------
+
     with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 

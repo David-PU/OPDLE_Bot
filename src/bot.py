@@ -126,7 +126,7 @@ def comparar_personajes(secreto, intento):
             emoji = "🟥"
             display = formatted_bounty_i if key == "Bounty" else (val_intento or "None")
 
-            rows.append((key, emoji, str(display)))
+        rows.append((key, emoji, str(display)))
 
     # Calcular anchos para alineado
     key_w = max(len(r[0]) for r in rows)

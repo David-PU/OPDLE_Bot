@@ -197,7 +197,7 @@
         "Haki": "None",
         "Bounty": "300000000"
     }, {
-        "Name": "Marshall D. Teach (Blackbeard)",
+        "Name": "Marshall D. Teach 'Blackbeard'",
         "Sex": "Male",
         "DevilFruitType": "Logia",
         "Devilfruit": "Yami Yami no Mi",
@@ -329,7 +329,7 @@
         "Haki": "AOC",
         "Bounty": "0"
     }, {
-        "Name": "Akainu (Sakazuki)",
+        "Name": "Sakazuki 'Akainu'",
         "Sex": "Male",
         "DevilFruitType": "Logia",
         "Devilfruit": "Magu Magu no Mi",
@@ -340,7 +340,7 @@
         "Haki": "AO",
         "Bounty": "5000000000"
     }, {
-        "Name": "Borsalino (Kizaru)",
+        "Name": "Borsalino 'Kizaru'",
         "Sex": "Male",
         "DevilFruitType": "Logia",
         "Devilfruit": "Pika Pika no Mi",
@@ -351,7 +351,7 @@
         "Haki": "AO",
         "Bounty": "3000000000"
     }, {
-        "Name": "Kuzan (Aokiji)",
+        "Name": "Kuzan 'Aokiji'",
         "Sex": "Male",
         "DevilFruitType": "Logia",
         "Devilfruit": "Hie Hie no Mi",
@@ -362,7 +362,7 @@
         "Haki": "AO",
         "Bounty": "0"
     }, {
-        "Name": "Fujitora (Issho)",
+        "Name": "Fujitora 'Issho'",
         "Sex": "Male",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Zushi Zushi no Mi",
@@ -505,7 +505,7 @@
         "Haki": "None",
         "Bounty": "24000000"
     }, {
-        "Name": "Mr. 1 (Daz Bonez)",
+        "Name": "Daz Bonez 'Mr. 1'",
         "Sex": "Male",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Supa Supa no Mi",
@@ -516,7 +516,7 @@
         "Haki": "None",
         "Bounty": "75000000"
     }, {
-        "Name": "Mr. 2 Bon Clay (Bentham)",
+        "Name": "Bon Clay Bentham 'Mr. 2'",
         "Sex": "Male",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Mane Mane no Mi",
@@ -582,7 +582,7 @@
         "Haki": "None",
         "Bounty": "64000000"
     }, {
-        "Name": "Shiryu (Shiliew)",
+        "Name": "Shiryu 'Shiliew'",
         "Sex": "Male",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Suke Suke no Mi",
@@ -604,7 +604,7 @@
         "Haki": "AO",
         "Bounty": "1374000000"
     }, {
-        "Name": "Edward Newgate (Whitebeard)",
+        "Name": "Edward Newgate 'Whitebeard'",
         "Sex": "Male",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Gura Gura no Mi",
@@ -615,7 +615,7 @@
         "Haki": "AOC",
         "Bounty": "5046000000"
     }, {
-        "Name": "Charlotte Linlin (Big Mom)",
+        "Name": "Charlotte Linlin 'Big Mom'",
         "Sex": "Female",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Soru Soru no Mi",
@@ -706,7 +706,7 @@
         "Name": "Momonosuke",
         "Sex": "Male",
         "DevilFruitType": "Zoan",
-        "Devilfruit": "Uo Uo no Mi Model: Seiryu (Artificial)",
+        "Devilfruit": "Uo Uo no Mi Model: Seiryu 'Artificial'",
         "Org": "Kozuki Clan",
         "Origin": "Grand Line",
         "Appears": "684",
@@ -736,7 +736,7 @@
         "Haki": "None",
         "Bounty": "0"
     }, {
-        "Name": "Denjiro (Kyoshiro)",
+        "Name": "Denjiro 'Kyoshiro'",
         "Sex": "Male",
         "DevilFruitType": "None",
         "Devilfruit": "None",
@@ -872,7 +872,7 @@
         "Sex": "Male",
         "DevilFruitType": "None",
         "Devilfruit": "None",
-        "Org": "CP0 (Pet)",
+        "Org": "CP0 'Pet'",
         "Origin": "Unknown",
         "Appears": "323",
         "Height": "25",
@@ -923,7 +923,7 @@
         "Haki": "None",
         "Bounty": "12000000"
     }, {
-        "Name": "Kuro (Capitán Kuro)",
+        "Name": "'Captain' Kuro",
         "Sex": "Male",
         "DevilFruitType": "None",
         "Devilfruit": "None",
@@ -956,7 +956,7 @@
         "Haki": "None",
         "Bounty": "25000000"
     }, {
-        "Name": "Donquixote Rocinante (Corazon)",
+        "Name": "Donquixote Rocinante 'Corazon'",
         "Sex": "Male",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Nagi Nagi no Mi",
@@ -1022,7 +1022,7 @@
         "Haki": "None",
         "Bounty": "+200000000"
     }, {
-        "Name": "Kureha (Dr. Kureha)",
+        "Name": "Dr. Kureha",
         "Sex": "Female",
         "DevilFruitType": "None",
         "Devilfruit": "None",
@@ -1033,7 +1033,7 @@
         "Haki": "None",
         "Bounty": "0"
     }, {
-        "Name": "Ivankov (Emporio Ivankov)",
+        "Name": "Emporio Ivankov",
         "Sex": "Male/Female",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Horu Horu no Mi",
@@ -1207,7 +1207,7 @@
         "Haki": "None",
         "Bounty": "0"
     }, {
-        "Name": "Ryokugyu (Aramaki)",
+        "Name": "Aramaki 'Ryokugyu'",
         "Sex": "Male",
         "DevilFruitType": "Logia",
         "Devilfruit": "Mori Mori no Mi",
@@ -1238,7 +1238,7 @@
         "Appears": "237",
         "Height": "180",
         "Haki": "None",
-        "Bounty": "0"
+        "Bounty": "None"
     }, {
         "Name": "Xebec",
         "Sex": "Male",
@@ -1293,7 +1293,7 @@
         "Appears": "70",
         "Height": "170",
         "Haki": "None",
-        "Bounty": "0"
+        "Bounty": "None"
     }
 	
 	
