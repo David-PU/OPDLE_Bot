@@ -1,5 +1,7 @@
 import random
+
 from database import personajes
+
 
 def elegir_personaje():
     lista = list(personajes.find())
