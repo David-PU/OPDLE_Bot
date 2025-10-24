@@ -23,8 +23,6 @@ load_dotenv()
 # ===== CONFIGURACIÓN =====
 TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_IDS = os.getenv("ADMIN_ID")
-MONGO_URI_CLUSTER = os.getenv("MONGO_URI_CLUSTER")
-MONGO_URI_LOCAL = os.getenv("MONGO_URI_LOCAL")
 DB_NAME = os.getenv("DB_NAME")
 
 # =====================
