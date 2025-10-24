@@ -21,10 +21,8 @@ from database import personajes
 load_dotenv()
 
 # ===== CONFIGURACIÓN =====
-TOKEN = os.getenv("BOT_TOKEN")
+TOKEN = os.getenv("BOT_TOKEN_DEV")
 ADMIN_IDS = os.getenv("ADMIN_ID")
-MONGO_URI_CLUSTER = os.getenv("MONGO_URI_CLUSTER")
-MONGO_URI_LOCAL = os.getenv("MONGO_URI_LOCAL")
 DB_NAME = os.getenv("DB_NAME")
 
 # =====================
@@ -32,7 +30,6 @@ DB_NAME = os.getenv("DB_NAME")
 # =====================
 
 def elegir_personaje(fixed_name=""):
-    # Si se solicita un personaje concreto, buscarlo (case-insensitive)
     if fixed_name:
         query = {"Name": {"$regex": f"^{re.escape(fixed_name)}$", "$options": "i"}}
         encontrado = personajes.find_one(query)
