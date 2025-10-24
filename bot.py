@@ -1,3 +1,4 @@
+import logging
 import os
 import random
 import re
@@ -24,12 +25,13 @@ load_dotenv()
 TOKEN = os.getenv("BOT_TOKEN_DEV")
 ADMIN_IDS = os.getenv("ADMIN_ID")
 DB_NAME = os.getenv("DB_NAME")
+logger = logging.getLogger(__name__)
 
 # =====================
 # FUNCIONES DE JUEGO
 # =====================
 
-def elegir_personaje(fixed_name=""):
+def elegir_personaje(fixed_name="Boa Hancock"):
     if fixed_name:
         query = {"Name": {"$regex": f"^{re.escape(fixed_name)}$", "$options": "i"}}
         encontrado = personajes.find_one(query)
@@ -44,7 +46,7 @@ def elegir_personaje(fixed_name=""):
 
 def comparar_personajes(secreto, intento):
 
-    FIELD_MAP = {
+    field_map = {
         "Sex": "Género",
         "Height": "Altura",
         "Appears": "1ra Aparición",
@@ -109,12 +111,20 @@ def comparar_personajes(secreto, intento):
                     emoji = "🟨"
             display = visual_intento or "None"
 
+        elif key == "DevilFruitType":
+            if val_secreto == val_intento:
+                emoji = "🟩"
+            else:
+                emoji = "🟥"
+
+            if val_intento in ["None", "Unknown"]:
+                display = "Sin Fruta"
+            else:
+                display = val_intento
+
         elif val_secreto == val_intento:
             emoji = "🟩"
             display = formatted_bounty_i if key == "Bounty" else (val_intento or "None")
-
-        elif key == "DevilFruitType" and val_intento == "None":
-            display = "Sin Fruta"
 
         elif key == "Appears" and num_secreto is not None and num_intento is not None:
             if num_secreto == num_intento:
@@ -131,18 +141,21 @@ def comparar_personajes(secreto, intento):
             elif num_secreto < num_intento:
                 emoji = "🔻"
             else:
-                emoji = "🟩" # Debería ser verde si los números son iguales
+                emoji = "🟩"
             display = formatted_bounty_i if key == "Bounty" else (val_intento or "None")
 
         else:
             emoji = "🟥"
             display = formatted_bounty_i if key == "Bounty" else (val_intento or "None")
 
-        if key == "Height" and display != "None":
-            display = display + " cm"
+        if key == "Height":
+            if val_intento in ["Unknown", "None"]:
+                display = "Desconocida"
+            else:
+                display = f"{val_intento} cm"
 
 
-        display_key = FIELD_MAP.get(key, key)
+        display_key = field_map.get(key, key)
         rows.append((display_key, emoji, str(display)))
 
     # Calcular anchos para alineado
@@ -160,9 +173,9 @@ def comparar_personajes(secreto, intento):
 
     return "<code>" + "\n".join(lines) + "</code>"
 
-def formatear_personaje(personaje):
+def formatear_personaje_acertado(personaje):
 
-    FIELD_MAP = {
+    field_map = {
         "Sex": "Género",
         "Height": "Altura",
         "Appears": "1ra Aparición",
@@ -178,16 +191,17 @@ def formatear_personaje(personaje):
     rows = []
     for c in campos_db:
         val = personaje.get(c, "")
-        display_key = FIELD_MAP.get(c, c)
+        display_key = field_map.get(c, c)
         emoji = "🟩"
 
         if c == "Bounty":
-            # Asumimos que format_bounty ya está definida y aplica el símbolo (ej. 💰)
             display = format_bounty(val)
         elif c == "Height":
             display = (val or "None") + " cm"
         elif c == "Appears":
             display = "Chapter " + (val or "None")
+        elif c == "Haki":
+            display = haki_visual(val)
         else:
             display = val or "None"
 
@@ -209,7 +223,7 @@ def haki_visual(val):
         return "None"
     s = str(val).upper().strip()
     if s == "" or s == "NONE":
-        return "None"
+        return "❌"
     seen = []
     for ch in s:
         if ch in mapping and mapping[ch] not in seen:
@@ -223,8 +237,8 @@ def format_bounty(val):
     if val is None:
         return "None"
     s = str(val).strip()
-    if s == "" or s.upper() == "NONE":
-        return "None"
+    if s == "" or s.upper() == "NONE" or s.upper() == "UNKNOWN":
+        return "Desconocida"
 
     digits = re.sub(r"[^\d]", "", s)
     if digits == "":
@@ -290,7 +304,7 @@ async def intento(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if intento_personaje["Name"].lower() == secreto["Name"].lower():
-        detalles = formatear_personaje(secreto)
+        detalles = formatear_personaje_acertado(secreto)
         await update.message.reply_text(
             f"🎉 ¡Correcto! El personaje era {secreto['Name']} 🏴‍☠️\n\n{detalles}",
             parse_mode="HTML"
@@ -308,6 +322,53 @@ async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data.clear()
     await update.message.reply_text("🔄 Juego reiniciado para este usuario.")
 
+async def guia_comando(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Muestra la guía, las reglas y el significado de los iconos del juego."""
+    logger.info(f"🔵 Comando /guia recibido por User ID: {update.effective_user.id}")
+
+    guia_text = (
+        "📜 **GUÍA DE JUEGO Y SÍMBOLOS**\n\n"
+        "¡Adivina el personaje secreto de One Piece 🏴‍☠️!\n"
+        "Cada intento te mostrará qué has acertado y qué no del personaje secreto.\n\n"
+
+        "--- **ICONOGRAFÍA DE ATRIBUTOS** ---\n"
+
+        "🟩 **VERDE** (Coincidencia Perfecta):\n"
+        "   El atributo del personaje que has introducido coincide **exactamente** con el "
+        "   del personaje secreto (Ej: Género, Tipo de Fruta, Haki, Origen, etc.).\n\n"
+
+        "🟥 **ROJO** (Sin Coincidencia):\n"
+        "   El atributo no coincide en absoluto o no tiene relación directa.\n\n"
+
+        "🟨 **AMARILLO** (Similitud/Parcialidad):\n"
+        "   Sólo se usa en el atributo **Haki**. Significa que has adivinado "
+        "   correctamente **al menos un tipo** de Haki (Observación, Armamento o Conquistador), "
+        "   pero no todos los que posee el personaje secreto.\n\n"
+
+        "--- **ICONOGRAFÍA DE VALORES NUMÉRICOS** ---\n"
+
+        "🔺 **TRIÁNGULO ARRIBA**:\n"
+        "   El valor del personaje secreto es **SUPERIOR** al que has introducido. "
+        "   (Aplica a: *1ra Aparición*, *Altura*, *Recompensa*).\n\n"
+
+        "🔻 **TRIÁNGULO ABAJO**:\n"
+        "   El valor del personaje secreto es **INFERIOR** al que has introducido. "
+        "   (Aplica a: *1ra Aparición*, *Altura*, *Recompensa*).\n\n"
+
+        "--- **ADVERTENCIA DE SPOILERS** ---\n"
+        "⚠️ **¡CUIDADO!** La base de datos contiene personajes, habilidades, recompensas "
+        "y afiliaciones actualizadas **hasta el último capítulo del manga**. "
+        "Juega bajo tu propio riesgo de **SPOILERS**.\n\n"
+
+        "Para empezar, usa el comando `/play` o escribe `@OPDLE_Dev_Bot` en cualquier chat."
+    )
+
+    await update.message.reply_text(
+        guia_text,
+        parse_mode='Markdown' # Usamos Markdown para los títulos en negrita (**)
+    )
+    logger.info("🟢 Guía enviada al usuario.")
+
 # =====================
 # INICIO DEL BOT
 # =====================
@@ -318,6 +379,7 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("play", play))
     app.add_handler(CommandHandler("reset", reset))
+    app.add_handler(CommandHandler("guia", guia_comando))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, intento))
     app.add_handler(InlineQueryHandler(inline_query_handler))
 

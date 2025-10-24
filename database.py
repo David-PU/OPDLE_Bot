@@ -20,7 +20,7 @@ def buscar_personajes_por_nombre(query, limit=10):
 
     resultados = personajes.find(
         {"Name": {"$regex": query, "$options": "i"}},
-        {"Name": 1, "_id": 0} # Proyectamos solo el campo "Name"
+        {"Name": 1, "_id": 0}
     ).limit(limit)
 
     return [doc['Name'] for doc in resultados]
