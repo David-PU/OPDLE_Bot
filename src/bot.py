@@ -46,6 +46,18 @@ def elegir_personaje(fixed_name=""):
     return random.choice(lista)
 
 def comparar_personajes(secreto, intento):
+
+    FIELD_MAP = {
+        "Sex": "Género",
+        "Height": "Altura",
+        "Appears": "1ra Aparición",
+        "Bounty": "Recompensa",
+        "Org": "Afiliación",
+        "Origin": "Origen",
+        "DevilFruitType": "Tipo de Fruta",
+        "Haki": "Haki"
+    }
+
     campos = [
         "Name", "Sex", "DevilFruitType",
         "Org", "Origin", "Appears", "Height", "Haki", "Bounty"
@@ -104,29 +116,37 @@ def comparar_personajes(secreto, intento):
             emoji = "🟩"
             display = formatted_bounty_i if key == "Bounty" else (val_intento or "None")
 
+        elif key == "DevilFruitType" and val_intento == "None":
+            display = "Sin Fruta"
+
         elif key == "Appears" and num_secreto is not None and num_intento is not None:
             if num_secreto == num_intento:
                 emoji = "🟩"
             elif num_secreto > num_intento:
-                emoji = "🟥⬆️"
+                emoji = "🔺"
             elif num_secreto < num_intento:
-                emoji = "🟥⬇️"
-            display = "Chapter " + val_intento
+                emoji = "🔻"
+            display = "Capítulo " + val_intento
 
         elif num_secreto is not None and num_intento is not None:
             if num_secreto > num_intento:
-                emoji = "🟥⬆️"
+                emoji = "🔺"
             elif num_secreto < num_intento:
-                emoji = "🟥⬇️"
+                emoji = "🔻"
             else:
-                emoji = "🟥"
+                emoji = "🟩" # Debería ser verde si los números son iguales
             display = formatted_bounty_i if key == "Bounty" else (val_intento or "None")
 
         else:
             emoji = "🟥"
             display = formatted_bounty_i if key == "Bounty" else (val_intento or "None")
 
-        rows.append((key, emoji, str(display)))
+        if key == "Height" and display != "None":
+            display = display + " cm"
+
+
+        display_key = FIELD_MAP.get(key, key)
+        rows.append((display_key, emoji, str(display)))
 
     # Calcular anchos para alineado
     key_w = max(len(r[0]) for r in rows)
@@ -137,27 +157,54 @@ def comparar_personajes(secreto, intento):
     # Construir líneas alineadas (monoespaciado dentro de <pre>)
     lines = []
     for key, emoji, val in rows:
-        extra_space = " "
-        if len(emoji) == 1: # Esto es true para "🟥"
-            extra_space = "  " # Dos espacios para igualar el ancho visual
+        if key == "Name":
+            continue
+        lines.append(f"{key.ljust(key_w)} | {emoji.ljust(emoji_w)} | {val.ljust(val_w)}")
 
-        lines.append(f"{key.ljust(key_w)} | {emoji.ljust(emoji_w)}{extra_space}| {val.ljust(val_w)}")
-
-    return "<pre>" + "\n".join(lines) + "</pre>"
+    return "<code>" + "\n".join(lines) + "</code>"
 
 def formatear_personaje(personaje):
-    campos = ["Name", "Sex", "DevilFruitType", "Org", "Origin", "Appears", "Height", "Haki", "Bounty"]
-    lines = []
-    for c in campos:
+
+    FIELD_MAP = {
+        "Sex": "Género",
+        "Height": "Altura",
+        "Appears": "1ra Aparición",
+        "Bounty": "Recompensa",
+        "Org": "Afiliación",
+        "Origin": "Origen",
+        "DevilFruitType": "Tipo de Fruta",
+        "Haki": "Haki"
+    }
+
+    campos_db = ["Sex", "DevilFruitType", "Org", "Origin", "Appears", "Height", "Haki", "Bounty"]
+
+    rows = []
+    for c in campos_db:
         val = personaje.get(c, "")
-        if val is None or str(val).strip() == "":
-            display = "None"
-        elif c == "Bounty":
+        display_key = FIELD_MAP.get(c, c)
+        emoji = "🟩"
+
+        if c == "Bounty":
+            # Asumimos que format_bounty ya está definida y aplica el símbolo (ej. 💰)
             display = format_bounty(val)
+        elif c == "Height":
+            display = (val or "None") + " cm"
+        elif c == "Appears":
+            display = "Chapter " + (val or "None")
         else:
-            display = val
-        lines.append(f"<b>{c}</b>: {display}")
-    return "\n".join(lines)
+            display = val or "None"
+
+        # Añadir la fila con la clave traducida, el emoji fijo, y el valor formateado
+        rows.append((display_key, emoji, str(display)))
+
+    key_w = max(len(r[0]) for r in rows)
+    val_w = max(len(r[2]) for r in rows)
+
+    lines = []
+    for key, emoji, val in rows:
+        lines.append(f"{key.ljust(key_w)} | {emoji}  | {val.ljust(val_w)}")
+
+    return "<code>" + "\n".join(lines) + "</code>"
 
 def haki_visual(val):
     mapping = {"O": "👁️", "A": "🦾", "C": "👑"}
@@ -223,7 +270,7 @@ async def inline_query_handler(update, context):
 # =====================
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("👋 ¡Bienvenido a *OPDle*! Un Wordle de One Piece.\nUsa /play para comenzar.",
+    await update.message.reply_text("👋 ¡Bienvenido a OPDle! Un Wordle de One Piece.\nUsa /play para comenzar.",
                                     parse_mode="HTML")
 
 async def play(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -248,7 +295,7 @@ async def intento(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if intento_personaje["Name"].lower() == secreto["Name"].lower():
         detalles = formatear_personaje(secreto)
         await update.message.reply_text(
-            f"🎉 ¡Correcto! El personaje era *{secreto['Name']}* 🏴‍☠️\n\n{detalles}",
+            f"🎉 ¡Correcto! El personaje era {secreto['Name']} 🏴‍☠️\n\n{detalles}",
             parse_mode="HTML"
         )
         context.user_data.clear()

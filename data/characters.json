@@ -1,6 +1,6 @@
 [{
         "Name": "Monkey D. Luffy",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Zoan",
         "Devilfruit": "Hito Hito no Mi: Model Nika",
         "Org": "Mugiwara Pirates",
@@ -11,7 +11,7 @@
         "Bounty": "3000000000"
     }, {
         "Name": "Roronoa Zoro",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Mugiwara Pirates",
@@ -22,7 +22,7 @@
         "Bounty": "1111000000"
     }, {
         "Name": "Nami",
-        "Sex": "Female",
+        "Sex": "Femenino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Mugiwara Pirates",
@@ -33,7 +33,7 @@
         "Bounty": "366000000"
     }, {
         "Name": "Usopp",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Mugiwara Pirates",
@@ -44,7 +44,7 @@
         "Bounty": "500000000"
     }, {
         "Name": "Sanji",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Mugiwara Pirates",
@@ -55,7 +55,7 @@
         "Bounty": "1032000000"
     }, {
         "Name": "Tony Tony Chopper",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Zoan",
         "Devilfruit": "Hito Hito no Mi",
         "Org": "Mugiwara Pirates",
@@ -66,7 +66,7 @@
         "Bounty": "1000"
     }, {
         "Name": "Nico Robin",
-        "Sex": "Female",
+        "Sex": "Femenino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Hana Hana no Mi",
         "Org": "Mugiwara Pirates",
@@ -77,7 +77,7 @@
         "Bounty": "930000000"
     }, {
         "Name": "Franky",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Mugiwara Pirates",
@@ -88,7 +88,7 @@
         "Bounty": "394000000"
     }, {
         "Name": "Brook",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Yomi Yomi no Mi",
         "Org": "Mugiwara Pirates",
@@ -99,7 +99,7 @@
         "Bounty": "383000000"
     }, {
         "Name": "Jinbe",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Mugiwara Pirates",
@@ -110,7 +110,7 @@
         "Bounty": "1100000000"
     }, {
         "Name": "Trafalgar D. Water Law",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Ope Ope no Mi",
         "Org": "Heart Pirates",
@@ -121,7 +121,7 @@
         "Bounty": "3000000000"
     }, {
         "Name": "Eustass Kid",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Jiki Jiki no Mi",
         "Org": "Kid Pirates",
@@ -132,7 +132,7 @@
         "Bounty": "3000000000"
     }, {
         "Name": "Killer",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Zoan",
         "Devilfruit": "Smile",
         "Org": "Kid Pirates",
@@ -143,7 +143,7 @@
         "Bounty": "200000000"
     }, {
         "Name": "X Drake",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Zoan",
         "Devilfruit": "Ryu Ryu no Mi: Model Allosaurus",
         "Org": "Marine",
@@ -154,7 +154,7 @@
         "Bounty": "702000000"
     }, {
         "Name": "Basil Hawkins",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Wara Wara no Mi",
         "Org": "Hawkins Pirates",
@@ -165,7 +165,7 @@
         "Bounty": "640000000"
     }, {
         "Name": "Scratchmen Apoo",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Oto Oto no Mi",
         "Org": "On Air Pirates",
@@ -176,7 +176,7 @@
         "Bounty": "350000000"
     }, {
         "Name": "Jewelry Bonney",
-        "Sex": "Female",
+        "Sex": "Femenino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Toshi Toshi no Mi",
         "Org": "Bonney Pirates",
@@ -187,7 +187,7 @@
         "Bounty": "140000000"
     }, {
         "Name": "Capone 'Gang' Bege",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Shiro Shiro no Mi",
         "Org": "Fire Tank Pirates",
@@ -198,7 +198,7 @@
         "Bounty": "300000000"
     }, {
         "Name": "Marshall D. Teach 'Blackbeard'",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Logia",
         "Devilfruit": "Yami Yami no Mi",
         "Org": "Blackbeard Pirates",
@@ -209,7 +209,7 @@
         "Bounty": "2247600000"
     }, {
         "Name": "Shanks",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Red Hair Pirates",
@@ -220,7 +220,7 @@
         "Bounty": "4048900000"
     }, {
         "Name": "Ben Beckman",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Red Hair Pirates",
@@ -231,7 +231,7 @@
         "Bounty": "0"
     }, {
         "Name": "Yasopp",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "",
         "Devilfruit": "None",
         "Org": "Red Hair Pirates",
@@ -242,7 +242,7 @@
         "Bounty": "0"
     }, {
         "Name": "Buggy",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "",
         "Devilfruit": "Bara Bara no Mi",
         "Org": "Cross Guild",
@@ -253,7 +253,7 @@
         "Bounty": "3000000000"
     }, {
         "Name": "Dracule Mihawk",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "",
         "Devilfruit": "None",
         "Org": "Cross Guild",
@@ -264,7 +264,7 @@
         "Bounty": "3590000000"
     }, {
         "Name": "Donquixote Doflamingo",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Ito Ito no Mi",
         "Org": "Donquixote Pirates",
@@ -275,7 +275,7 @@
         "Bounty": "340000000"
     }, {
         "Name": "Crocodile",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Logia",
         "Devilfruit": "Suna Suna no Mi",
         "Org": "Cross Guild",
@@ -286,7 +286,7 @@
         "Bounty": "1965000000"
     }, {
         "Name": "Boa Hancock",
-        "Sex": "Female",
+        "Sex": "Femenino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Mero Mero no Mi",
         "Org": "Kuja Pirates",
@@ -297,7 +297,7 @@
         "Bounty": "1659000000"
     }, {
         "Name": "Sabo",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Logia",
         "Devilfruit": "Mera Mera no Mi",
         "Org": "Revolutionary Army",
@@ -308,7 +308,7 @@
         "Bounty": "602000000"
     }, {
         "Name": "Monkey D. Garp",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Marine",
@@ -319,7 +319,7 @@
         "Bounty": "3000000000"
     }, {
         "Name": "Sengoku",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Zoan",
         "Devilfruit": "Hito Hito no Mi: Model Daibutsu",
         "Org": "Marine",
@@ -330,7 +330,7 @@
         "Bounty": "0"
     }, {
         "Name": "Sakazuki 'Akainu'",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Logia",
         "Devilfruit": "Magu Magu no Mi",
         "Org": "Marine",
@@ -341,7 +341,7 @@
         "Bounty": "5000000000"
     }, {
         "Name": "Borsalino 'Kizaru'",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Logia",
         "Devilfruit": "Pika Pika no Mi",
         "Org": "Marine",
@@ -352,7 +352,7 @@
         "Bounty": "3000000000"
     }, {
         "Name": "Kuzan 'Aokiji'",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Logia",
         "Devilfruit": "Hie Hie no Mi",
         "Org": "Blackbeard Pirates",
@@ -363,7 +363,7 @@
         "Bounty": "0"
     }, {
         "Name": "Fujitora 'Issho'",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Zushi Zushi no Mi",
         "Org": "Marine",
@@ -374,7 +374,7 @@
         "Bounty": "3000000000"
     }, {
         "Name": "Smoker",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Logia",
         "Devilfruit": "Moku Moku no Mi",
         "Org": "Marine",
@@ -385,7 +385,7 @@
         "Bounty": "0"
     }, {
         "Name": "Tashigi",
-        "Sex": "Female",
+        "Sex": "Femenino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Marine",
@@ -396,7 +396,7 @@
         "Bounty": "0"
     }, {
         "Name": "Koby",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Marine",
@@ -407,7 +407,7 @@
         "Bounty": "500000000"
     }, {
         "Name": "Silvers Rayleigh",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Ex-Roger Pirates",
@@ -418,7 +418,7 @@
         "Bounty": "Unknown"
     }, {
         "Name": "Dr. Vegapunk",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Nomi Nomi no Mi",
         "Org": "Marine",
@@ -429,7 +429,7 @@
         "Bounty": "0"
     }, {
         "Name": "Bartholomew Kuma",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Nikyu Nikyu no Mi",
         "Org": "Unknown",
@@ -440,7 +440,7 @@
         "Bounty": "296000000"
     }, {
         "Name": "Sentomaru",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Unknown",
@@ -451,7 +451,7 @@
         "Bounty": "500000000"
     }, {
         "Name": "Rob Lucci",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Zoan",
         "Devilfruit": "Neko Neko no Mi: Model Leopard",
         "Org": "CP0",
@@ -462,7 +462,7 @@
         "Bounty": "0"
     }, {
         "Name": "Kaku",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Zoan",
         "Devilfruit": "Ushi Ushi no Mi: Model Giraffe",
         "Org": "CP0",
@@ -473,7 +473,7 @@
         "Bounty": "0"
     }, {
         "Name": "Blueno",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Doa Doa no Mi",
         "Org": "CP0",
@@ -484,7 +484,7 @@
         "Bounty": "0"
     }, {
         "Name": "Kumadori",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "CP0",
@@ -495,7 +495,7 @@
         "Bounty": "0"
     }, {
         "Name": "Foxy",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Noro Noro no Mi",
         "Org": "Foxy Pirates",
@@ -506,7 +506,7 @@
         "Bounty": "24000000"
     }, {
         "Name": "Daz Bonez 'Mr. 1'",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Supa Supa no Mi",
         "Org": "Cross Guild",
@@ -517,7 +517,7 @@
         "Bounty": "75000000"
     }, {
         "Name": "Bon Clay Bentham 'Mr. 2'",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Mane Mane no Mi",
         "Org": "Ex-Baroque Works",
@@ -528,7 +528,7 @@
         "Bounty": "32000000"
     }, {
         "Name": "Perona",
-        "Sex": "Female",
+        "Sex": "Femenino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Horo Horo no Mi",
         "Org": "Ex-Thriller Bark Pirates",
@@ -539,7 +539,7 @@
         "Bounty": "0"
     }, {
         "Name": "Gecko Moria",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Kage Kage no Mi",
         "Org": "Ex-Thriller Bark Pirates",
@@ -550,7 +550,7 @@
         "Bounty": "320000000"
     }, {
         "Name": "Catarina Devon",
-        "Sex": "Female",
+        "Sex": "Femenino",
         "DevilFruitType": "Zoan",
         "Devilfruit": "Inu Inu no Mi: Model Kyūbi no Kitsune",
         "Org": "Blackbeard Pirates",
@@ -561,7 +561,7 @@
         "Bounty": "0"
     }, {
         "Name": "Jesus Burgess",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Riki Riki no Mi",
         "Org": "Blackbeard Pirates",
@@ -572,7 +572,7 @@
         "Bounty": "20000000"
     }, {
         "Name": "Van Augur",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Wapu Wapu no Mi",
         "Org": "Blackbeard Pirates",
@@ -583,7 +583,7 @@
         "Bounty": "64000000"
     }, {
         "Name": "Shiryu 'Shiliew'",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Suke Suke no Mi",
         "Org": "Blackbeard Pirates",
@@ -594,7 +594,7 @@
         "Bounty": "0"
     }, {
         "Name": "Marco",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Zoan",
         "Devilfruit": "Tori Tori no Mi: Model Phoenix",
         "Org": "Ex-Whitebeard Pirates",
@@ -605,7 +605,7 @@
         "Bounty": "1374000000"
     }, {
         "Name": "Edward Newgate 'Whitebeard'",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Gura Gura no Mi",
         "Org": "Whitebeard Pirates",
@@ -616,7 +616,7 @@
         "Bounty": "5046000000"
     }, {
         "Name": "Charlotte Linlin 'Big Mom'",
-        "Sex": "Female",
+        "Sex": "Femenino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Soru Soru no Mi",
         "Org": "Big Mom Pirates",
@@ -627,7 +627,7 @@
         "Bounty": "4388000000"
     }, {
         "Name": "King",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Zoan",
         "Devilfruit": "Ryu Ryu no Mi: Model Pteranodon",
         "Org": "Beast Pirates",
@@ -638,7 +638,7 @@
         "Bounty": "1390000000"
     }, {
         "Name": "Queen",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Zoan",
         "Devilfruit": "Ryu Ryu no Mi: Model Brachiosaurus",
         "Org": "Beast Pirates",
@@ -649,7 +649,7 @@
         "Bounty": "1320000000"
     }, {
         "Name": "Jack",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Zoan",
         "Devilfruit": "Zou Zou no Mi: Model Mammoth",
         "Org": "Beast Pirates",
@@ -660,7 +660,7 @@
         "Bounty": "1000000000"
     }, {
         "Name": "Kanjuro",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Fude Fude no Mi",
         "Org": "Kurozumi Family",
@@ -671,7 +671,7 @@
         "Bounty": "0"
     }, {
         "Name": "Kin'emon",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Fuku Fuku no Mi",
         "Org": "Kozuki Clan",
@@ -682,7 +682,7 @@
         "Bounty": "0"
     }, {
         "Name": "Kikunojo",
-        "Sex": "Female",
+        "Sex": "Femenino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Kozuki Clan",
@@ -693,7 +693,7 @@
         "Bounty": "0"
     }, {
         "Name": "Kozuki Oden",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Kozuki Clan",
@@ -704,7 +704,7 @@
         "Bounty": "0"
     }, {
         "Name": "Momonosuke",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Zoan",
         "Devilfruit": "Uo Uo no Mi Model: Seiryu 'Artificial'",
         "Org": "Kozuki Clan",
@@ -715,7 +715,7 @@
         "Bounty": "0"
     }, {
         "Name": "Kurozumi Orochi",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Zoan",
         "Devilfruit": "Hebi Hebi no Mi Model: Yamata no Orochi",
         "Org": "Kurozumi Family",
@@ -726,7 +726,7 @@
         "Bounty": "0"
     }, {
         "Name": "Hiyori",
-        "Sex": "Female",
+        "Sex": "Femenino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Kozuki Clan",
@@ -737,7 +737,7 @@
         "Bounty": "0"
     }, {
         "Name": "Denjiro 'Kyoshiro'",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Kozuki Clan",
@@ -748,7 +748,7 @@
         "Bounty": "0"
     }, {
         "Name": "Toko",
-        "Sex": "Female",
+        "Sex": "Femenino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Shimotsu Family",
@@ -759,7 +759,7 @@
         "Bounty": "0"
     }, {
         "Name": "Inuarashi",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Minks",
@@ -770,7 +770,7 @@
         "Bounty": "0"
     }, {
         "Name": "Nekomamushi",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Minks",
@@ -781,7 +781,7 @@
         "Bounty": "0"
     }, {
         "Name": "Carrot",
-        "Sex": "Female",
+        "Sex": "Femenino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Minks",
@@ -792,7 +792,7 @@
         "Bounty": "0"
     }, {
         "Name": "Pedro",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Minks",
@@ -803,7 +803,7 @@
         "Bounty": "382000000"
     }, {
         "Name": "Hody Jones",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "New Fish-Man Pirates",
@@ -814,7 +814,7 @@
         "Bounty": "0"
     }, {
         "Name": "Fisher Tiger",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Sun Pirates",
@@ -825,7 +825,7 @@
         "Bounty": "230000000"
     }, {
         "Name": "Arlong",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Arlong Pirates",
@@ -836,7 +836,7 @@
         "Bounty": "20000000"
     }, {
         "Name": "Nefertari Vivi",
-        "Sex": "Female",
+        "Sex": "Femenino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Arabasta Kingdom",
@@ -847,7 +847,7 @@
         "Bounty": "0"
     }, {
         "Name": "Pell",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Zoan",
         "Devilfruit": "Tori Tori no Mi Model: Falcon",
         "Org": "Arabasta Kingdom",
@@ -858,7 +858,7 @@
         "Bounty": "0"
     }, {
         "Name": "Enel",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Logia",
         "Devilfruit": "Goro Goro no Mi",
         "Org": "Ex-God's Army",
@@ -869,7 +869,7 @@
         "Bounty": "0"
     }, {
         "Name": "Hattori",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "CP0 'Pet'",
@@ -880,7 +880,7 @@
         "Bounty": "0"
     }, {
         "Name": "Bell-mère",
-        "Sex": "Female",
+        "Sex": "Femenino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Ex-Marine",
@@ -891,7 +891,7 @@
         "Bounty": "0"
     }, {
         "Name": "Kaya",
-        "Sex": "Female",
+        "Sex": "Femenino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "None",
@@ -902,7 +902,7 @@
         "Bounty": "0"
     }, {
         "Name": "Don Krieg",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Don Krieg Pirates",
@@ -913,7 +913,7 @@
         "Bounty": "17000000"
     }, {
         "Name": "Gin",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Don Krieg Pirates",
@@ -924,7 +924,7 @@
         "Bounty": "12000000"
     }, {
         "Name": "'Captain' Kuro",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Ex-Black Cat Pirates",
@@ -935,7 +935,7 @@
         "Bounty": "16000000"
     }, {
         "Name": "Bellamy",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Bane Bane no Mi",
         "Org": "Ex-Donquixote Pirates",
@@ -946,7 +946,7 @@
         "Bounty": "195000000"
     }, {
         "Name": "Montblanc Cricket",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Montblanc family",
@@ -957,7 +957,7 @@
         "Bounty": "25000000"
     }, {
         "Name": "Donquixote Rocinante 'Corazon'",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Nagi Nagi no Mi",
         "Org": "Marine",
@@ -968,7 +968,7 @@
         "Bounty": "0"
     }, {
         "Name": "Pica",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Ishi Ishi no Mi",
         "Org": "Donquixote Family",
@@ -979,7 +979,7 @@
         "Bounty": "99000000"
     }, {
         "Name": "Sugar",
-        "Sex": "Female",
+        "Sex": "Femenino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Hobi Hobi no Mi",
         "Org": "Donquixote Family",
@@ -990,7 +990,7 @@
         "Bounty": "0"
     }, {
         "Name": "Kyros",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "None",
@@ -1001,7 +1001,7 @@
         "Bounty": "0"
     }, {
         "Name": "Rebecca",
-        "Sex": "Female",
+        "Sex": "Femenino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "None",
@@ -1012,7 +1012,7 @@
         "Bounty": "0"
     }, {
         "Name": "Hina",
-        "Sex": "Female",
+        "Sex": "Femenino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Ori Ori no Mi",
         "Org": "Marine",
@@ -1023,7 +1023,7 @@
         "Bounty": "+200000000"
     }, {
         "Name": "Dr. Kureha",
-        "Sex": "Female",
+        "Sex": "Femenino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Sakura Kingdom",
@@ -1034,7 +1034,7 @@
         "Bounty": "0"
     }, {
         "Name": "Emporio Ivankov",
-        "Sex": "Male/Female",
+        "Sex": "Masculino/Femenino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Horu Horu no Mi",
         "Org": "Revolutionary Army",
@@ -1045,7 +1045,7 @@
         "Bounty": "+100000000"
     }, {
         "Name": "Koala",
-        "Sex": "Female",
+        "Sex": "Femenino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Revolutionary Army",
@@ -1056,7 +1056,7 @@
         "Bounty": "0"
     }, {
         "Name": "Hack",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Revolutionary Army",
@@ -1067,7 +1067,7 @@
         "Bounty": "0"
     }, {
         "Name": "Monkey D. Dragon",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Unknown",
         "Devilfruit": "Unknown",
         "Org": "Revolutionary Army",
@@ -1078,7 +1078,7 @@
         "Bounty": "0"
     }, {
         "Name": "Vinsmoke Judge",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Vinsmoke Family",
@@ -1089,7 +1089,7 @@
         "Bounty": "0"
     }, {
         "Name": "Reiju Vinsmoke",
-        "Sex": "Female",
+        "Sex": "Femenino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Vinsmoke Family",
@@ -1100,7 +1100,7 @@
         "Bounty": "0"
     }, {
         "Name": "Ichiji Vinsmoke",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Origin": "North Blue",
@@ -1110,7 +1110,7 @@
         "Bounty": "0"
     }, {
         "Name": "Niji Vinsmoke",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Origin": "North Blue",
@@ -1120,7 +1120,7 @@
         "Bounty": "0"
     }, {
         "Name": "Caribou",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Logia",
         "Devilfruit": "Numa Numa no Mi",
         "Org": "Caribou Pirates",
@@ -1131,7 +1131,7 @@
         "Bounty": "210000000"
     }, {
         "Name": "Vasco Shot",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Gabu Gabu no Mi",
         "Org": "Blackbeard Pirates",
@@ -1142,7 +1142,7 @@
         "Bounty": "0"
     }, {
         "Name": "Doc Q",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Shiku Shiku no Mi",
         "Org": "Blackbeard Pirates",
@@ -1153,7 +1153,7 @@
         "Bounty": "+72000000"
     }, {
         "Name": "Sanjuan Wolf",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Deka Deka no Mi",
         "Org": "Blackbeard Pirates",
@@ -1164,7 +1164,7 @@
         "Bounty": "0"
     }, {
         "Name": "Avalo Pizarro",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Paramecia",
         "Devilfruit": "Shima Shima no Mi",
         "Org": "Blackbeard Pirates",
@@ -1175,7 +1175,7 @@
         "Bounty": "0"
     }, {
         "Name": "Shirahoshi",
-        "Sex": "Female",
+        "Sex": "Femenino",
         "DevilFruitType": "",
         "Devilfruit": "",
         "Org": "Neptune Family",
@@ -1186,7 +1186,7 @@
         "Bounty": "0"
     }, {
         "Name": "Fukurokuju",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Kurozumi Family",
@@ -1197,7 +1197,7 @@
         "Bounty": "0"
     }, {
         "Name": "Hajrudin",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "New Giant Warrior Pirates",
@@ -1208,7 +1208,7 @@
         "Bounty": "0"
     }, {
         "Name": "Aramaki 'Ryokugyu'",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Logia",
         "Devilfruit": "Mori Mori no Mi",
         "Org": "Marine",
@@ -1219,7 +1219,7 @@
         "Bounty": "3000000000"
     }, {
         "Name": "Helmeppo",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Marine",
@@ -1230,7 +1230,7 @@
         "Bounty": "100000000"
     }, {
         "Name": "Gan Fall",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Skypiea",
@@ -1241,7 +1241,7 @@
         "Bounty": "None"
     }, {
         "Name": "Xebec",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Rocks Pirates",
@@ -1252,7 +1252,7 @@
         "Bounty": "Unknown"
     }, {
         "Name": "Gloriosa",
-        "Sex": "Female",
+        "Sex": "Femenino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Kuja Tribe",
@@ -1263,7 +1263,7 @@
         "Bounty": "Unknown"
     }, {
         "Name": "Kaidou",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Zoan",
         "Devilfruit": "Uo Uo no Mi Model: Seiryu",
         "Org": "Beasts Pirates",
@@ -1274,7 +1274,7 @@
         "Bounty": "4611100000"
     }, {
         "Name": "Caesar Clown",
-        "Sex": "Male",
+        "Sex": "Masculino",
         "DevilFruitType": "Logia",
         "Devilfruit": "Gasu Gasu no Mi",
         "Org": "NEO MADS",
@@ -1285,7 +1285,7 @@
         "Bounty": "300000000"
     }, {
         "Name": "Nojiko",
-        "Sex": "Female",
+        "Sex": "Femenino",
         "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "None",
