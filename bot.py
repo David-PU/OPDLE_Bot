@@ -3,8 +3,10 @@ import os
 import random
 import re
 import uuid
+from datetime import datetime
 
 from dotenv import load_dotenv
+from pymongo.errors import DuplicateKeyError
 from telegram import InlineQueryResultArticle, InputTextMessageContent
 from telegram import Update
 from telegram.ext import (
@@ -17,14 +19,17 @@ from telegram.ext import (
 from telegram.ext import InlineQueryHandler
 
 from database import buscar_personajes_por_nombre
-from database import personajes
+from database import db
+from database import init_db
+from database import personajes, usuarios
 
 load_dotenv()
 
 # ===== CONFIGURACIÓN =====
 TOKEN = os.getenv("BOT_TOKEN_DEV")
 ADMIN_IDS = os.getenv("ADMIN_ID")
-DB_NAME = os.getenv("DB_NAME")
+MONGO_URI = os.getenv("MONGO_URI_REMOTE")
+DB_NAME = os.getenv("DB_NAME", "opdle_db")
 logger = logging.getLogger(__name__)
 
 # =====================
@@ -173,7 +178,18 @@ def comparar_personajes(secreto, intento):
 
     return "<code>" + "\n".join(lines) + "</code>"
 
-def formatear_personaje_acertado(personaje):
+async def formatear_personaje_acertado(personaje, update, context):
+
+    # Lógica para BBDD
+    telegram_id = update.effective_user.id
+    intentos_usados = context.user_data.get("intentos_usados", 1) # Ya deberías tener el conteo
+
+    # Llama a la función de actualización de DB para la victoria
+    await actualizar_victoria(telegram_id, intentos_usados)
+
+    # Marca la partida como terminada para que el próximo /play no la cuente como derrota.
+    # context.user_data["juego_activo"] = False # o context.user_data["partida_ganada"] = True
+    context.user_data.clear()
 
     field_map = {
         "Sex": "Género",
@@ -280,17 +296,130 @@ async def inline_query_handler(update, context):
     await update.inline_query.answer(articulos, cache_time=5)
 
 # =====================
+# FUNCIONES DE BBDD
+# =====================
+
+async def asegurar_usuario_existe(telegram_id: int, user_info) -> None:
+    # Se verifica si el usuario existe y si no lo crea
+    usuario = await usuarios.find_one({"_id": telegram_id})
+
+    if usuario is None:
+        alias = user_info.username if user_info.username else user_info.first_name
+
+        usuario_inicial = {
+            "_id": telegram_id,
+            "telegramId": telegram_id,
+            "alias": alias,
+            "totalGamesPlayed": 0,
+            "totalGamesWon": 0,
+            "totalGuesses": 0,
+            "currentStreak": 0,
+            "maxStreak": 0,
+            "firstPlayed": datetime.now(),
+            "lastPlayed": datetime.now()
+        }
+
+        try:
+            await usuarios.insert_one(usuario_inicial)
+            logger.info(f"Nuevo usuario creado: {telegram_id}")
+        except DuplicateKeyError:
+            pass
+
+async def actualizar_derrota(telegram_id: int, intentos_usados: int) -> None:
+    # Si el usuario abandona (vuelve a darle al /play) se actualizan los stats de la partida que tenía en juego
+    await usuarios.update_one(
+        {"_id": telegram_id},
+        {
+            "$inc": {
+                "totalGamesPlayed": 1,
+                "totalGuesses": intentos_usados
+            },
+            "$set": {
+                "currentStreak": 0,
+                "lastPlayed": datetime.now()
+            }
+        }
+    )
+    logger.info(f"Estadísticas de derrota (abandono) actualizadas para {telegram_id}")
+
+async def actualizar_victoria(telegram_id: int, intentos_usados: int) -> None:
+    # Actualiza los stats de un jugador tras la victoria
+    # Usamos $inc para incrementar contadores de forma atómica
+    # Usamos $max para actualizar la racha máxima solo si el valor es mayor
+    await usuarios.update_one(
+        {"_id": telegram_id},
+        {
+            "$inc": {
+                "totalGamesPlayed": 1,
+                "totalGamesWon": 1,
+                "totalGuesses": intentos_usados,
+                "currentStreak": 1
+            },
+            "$set": {
+                "lastPlayed": datetime.now()
+            }
+        }
+    )
+
+    # 2. SEGUNDA OPERACIÓN: Actualizar maxStreak
+    # Aquí usamos un $max para asegurarse de que maxStreak siempre sea el valor más alto.
+    # El valor de currentStreak ya se habrá incrementado en la DB.
+    await usuarios.update_one(
+        {"_id": telegram_id},
+        {
+            "$max": {
+                "maxStreak": "$currentStreak" # Usa el valor actual de currentStreak en la DB
+            }
+        }
+    )
+    logger.info(f"Estadísticas de victoria actualizadas para {telegram_id}")
+
+# =====================
 # COMANDOS DEL BOT
 # =====================
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("👋 ¡Bienvenido a OPDle! Un Wordle de One Piece.\nUsa /play para comenzar.",
                                     parse_mode="HTML")
+    usuario_inicial = {
+        "_id": update.effective_user.id,
+        "telegramId": update.effective_user.id,
+        "alias": update.effective_user.username or update.effective_user.first_name,
+        "totalGamesPlayed": 0,
+        "totalGamesWon": 0,
+        "totalGuesses": 0,
+        "currentStreak": 0,
+        "maxStreak": 0,
+        "firstPlayed": datetime.now(),
+        "lastPlayed": datetime.now()
+    }
+    db.usuarios.insert_one(usuario_inicial)
 
-async def play(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    secreto = elegir_personaje()
-    context.user_data["secreto"] = secreto
-    await update.message.reply_text("🔍 He elegido un personaje de One Piece. ¡Adivina quién es escribiendo su nombre!")
+async def play(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    telegram_id = update.effective_user.id
+    # Lógica de abandono sin terminar partida
+    # Revisamos si el usuario tiene una partida activa
+    if context.user_data.get("juego_activo", False):
+        # El juego anterior se considera una DERROTA por abandono
+        intentos_usados = context.user_data.get("intentos_usados", 0) # Debe ser el total de intentos que llevaba
+        # Llama a la función de actualización de DB para la derrota
+        await actualizar_derrota(telegram_id, intentos_usados)
+        # Informa al usuario (opcional)
+        await update.message.reply_text("❌ Partida anterior abandonada. ¡Iniciando una nueva!")
+
+        # Limpiamos los datos del juego anterior ANTES de empezar el nuevo
+        context.user_data.clear()
+        # ----------------------------------------------
+
+        # 2. --- INSERCIÓN INICIAL (Si es la primera vez que juega) ---
+        # La función debe buscar si el usuario existe y, si no, lo inserta.
+        await asegurar_usuario_existe(telegram_id, update.effective_user)
+        # -----------------------------------------------------------
+
+        # 3. --- LÓGICA PARA INICIAR EL NUEVO JUEGO ---
+        secreto = elegir_personaje()
+        context.user_data["secreto"] = secreto
+        await update.message.reply_text("🔍 He elegido un personaje de One Piece. ¡Adivina quién es escribiendo su nombre!")
 
 async def intento(update: Update, context: ContextTypes.DEFAULT_TYPE):
     nombre = update.message.text.strip()
@@ -307,7 +436,7 @@ async def intento(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if intento_personaje["Name"].lower() == secreto["Name"].lower():
-        detalles = formatear_personaje_acertado(secreto)
+        detalles = formatear_personaje_acertado(secreto, update, context)
         await update.message.reply_text(
             f"🎉 ¡Correcto! El personaje era {secreto['Name']} 🏴‍☠️\n\n{detalles}",
             parse_mode="HTML"
@@ -377,14 +506,24 @@ async def guia_comando(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 # =====================
 
 def main():
+
+    db_connection = init_db(MONGO_URI, DB_NAME)
+    if db_connection is None:
+        logger.critical("🚨 La conexión a la base de datos es NULA. El bot NO puede iniciarse sin DB.")
+        exit(1)
+
     app = ApplicationBuilder().token(TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("play", play))
+    #app.add_handler(CommandHandler("play", lambda u, c: play(u, c, db_connection)))
     app.add_handler(CommandHandler("reset", reset))
     app.add_handler(CommandHandler("guia", guia_comando))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, intento))
     app.add_handler(InlineQueryHandler(inline_query_handler))
+
+
+
 
     print("🤖 Bot OPDle en marcha...")
     app.run_polling()
