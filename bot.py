@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 # FUNCIONES DE JUEGO
 # =====================
 
-def elegir_personaje(fixed_name="Boa Hancock"):
+def elegir_personaje(fixed_name=""):
     if fixed_name:
         query = {"Name": {"$regex": f"^{re.escape(fixed_name)}$", "$options": "i"}}
         encontrado = personajes.find_one(query)
@@ -237,9 +237,10 @@ def format_bounty(val):
     if val is None:
         return "None"
     s = str(val).strip()
-    if s == "" or s.upper() == "NONE" or s.upper() == "UNKNOWN":
+    if s.upper() == "UNKNOWN":
         return "Desconocida"
-
+    elif s.upper() == "NONE" or s == "0":
+        return "Sin Recompensa"
     digits = re.sub(r"[^\d]", "", s)
     if digits == "":
         return s
@@ -249,7 +250,9 @@ def format_bounty(val):
     except ValueError:
         return s
 
-    if 100_000_000 <= n <= 999_999_999:
+    if n > 1_000_000 and n < 100_000_000:
+        return f"{BERRIE_SYMBOL}{n // 1_000_000} M"
+    elif 100_000_000 <= n <= 999_999_999:
         return f"{BERRIE_SYMBOL}{n // 1_000_000} M"
     elif n >= 1_000_000_000:
         return f"{BERRIE_SYMBOL}{n // 1_000_000} M"
