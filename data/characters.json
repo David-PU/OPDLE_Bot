@@ -232,7 +232,7 @@
     }, {
         "Name": "Yasopp",
         "Sex": "Masculino",
-        "DevilFruitType": "",
+        "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Red Hair Pirates",
         "Origin": "East Blue",
@@ -243,7 +243,7 @@
     }, {
         "Name": "Buggy",
         "Sex": "Masculino",
-        "DevilFruitType": "",
+        "DevilFruitType": "Paramecia",
         "Devilfruit": "Bara Bara no Mi",
         "Org": "Cross Guild",
         "Origin": "East Blue",
@@ -254,7 +254,7 @@
     }, {
         "Name": "Dracule Mihawk",
         "Sex": "Masculino",
-        "DevilFruitType": "",
+        "DevilFruitType": "None",
         "Devilfruit": "None",
         "Org": "Cross Guild",
         "Origin": "Unknown",
@@ -1176,8 +1176,8 @@
     }, {
         "Name": "Shirahoshi",
         "Sex": "Femenino",
-        "DevilFruitType": "",
-        "Devilfruit": "",
+        "DevilFruitType": "None",
+        "DevilFruit": "None",
         "Org": "Neptune Family",
         "Origin": "Grand Line",
         "Appears": "612",

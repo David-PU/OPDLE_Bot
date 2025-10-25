@@ -1,11 +1,9 @@
-import asyncio
 import logging
 import os
 import random
 import re
 import uuid
 from datetime import datetime
-from urllib.parse import quote_plus
 
 from dotenv import load_dotenv
 from pymongo.errors import DuplicateKeyError
@@ -20,16 +18,18 @@ from telegram.ext import (
 )
 from telegram.ext import InlineQueryHandler
 
-from database import init_db
+from database import (
+    obtener_estadisticas_usuario, buscar_personajes_por_nombre,
+    actualizar_estadisticas_usuario_win_loss, registrar_inicio_partida,
+    registrar_intento_fallido
+)
 from database import personajes, usuarios
-from database import verify_db_connection, buscar_personajes_por_nombre
 
 load_dotenv()
 
 # ===== CONFIGURACIÓN =====
 TOKEN = os.getenv("BOT_TOKEN_DEV")
 ADMIN_IDS = os.getenv("ADMIN_ID")
-DB_NAME = os.getenv("DB_NAME")
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 # FUNCIONES DE JUEGO
 # =====================
 
-def elegir_personaje(fixed_name=""):
+def elegir_personaje(fixed_name="Nami"):
     if fixed_name:
         query = {"Name": {"$regex": f"^{re.escape(fixed_name)}$", "$options": "i"}}
         encontrado = personajes.find_one(query)
@@ -87,7 +87,6 @@ def comparar_personajes(secreto, intento):
 
         visual_intento = haki_visual(val_intento)
 
-        # Determinar emoji y texto mostrable
         if key == "Haki":
             val_s = val_secreto.upper().strip()
             val_i = val_intento.upper().strip()
@@ -179,15 +178,7 @@ def comparar_personajes(secreto, intento):
 
     return "<code>" + "\n".join(lines) + "</code>"
 
-async def formatear_personaje_acertado(personaje, update, context):
-
-    # Lógica para BBDD
-    telegram_id = update.effective_user.id
-    intentos_usados = context.user_data.get("intentos_usados", 1) # Ya deberías tener el conteo
-
-    # Llama a la función de actualización de DB para la victoria
-    await actualizar_victoria(telegram_id, intentos_usados)
-
+def formatear_personaje_acertado(personaje, update, context):
     # Marca la partida como terminada para que el próximo /play no la cuente como derrota.
     # context.user_data["juego_activo"] = False # o context.user_data["partida_ganada"] = True
     context.user_data.clear()
@@ -276,13 +267,13 @@ def format_bounty(val):
     else:
         return f"{BERRIE_SYMBOL}{s}"
 
-async def inline_query_handler(update, context):
+async def inline_query_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.inline_query.query
+    logger.debug(f"Inline query: '{query}'")
 
-    # 1. Búsqueda en la base de datos
+    # Llamada SÍNCRONA a la función de DB
     resultados = buscar_personajes_por_nombre(query)
 
-    # 2. Construir la respuesta
     articulos = []
     for nombre in resultados:
         articulos.append(
@@ -292,48 +283,37 @@ async def inline_query_handler(update, context):
                 input_message_content=InputTextMessageContent(f"{nombre}")
             )
         )
-
-    # 3. Enviar los resultados inline
+    # Llamada SÍNCRONA a la API de Telegram
     await update.inline_query.answer(articulos, cache_time=5)
 
 # =====================
 # FUNCIONES DE BBDD
 # =====================
 
-async def asegurar_usuario_existe(telegram_id: int, user_info) -> None:
-
+def asegurar_usuario_existe(telegram_id: int, user_info) -> None:
     if usuarios is None:
         logger.error("Colección 'usuarios' es None. Fallo de conexión a DB.")
-        raise RuntimeError("La base de datos no está inicializada o falló la conexión.")
+        return
 
-    usuario = await usuarios.find_one({"_id": telegram_id})
+    usuario = usuarios.find_one({"_id": telegram_id})
 
     if usuario is None:
         alias = user_info.username if user_info.username else user_info.first_name
-
         usuario_inicial = {
-            "_id": telegram_id,
-            "telegramId": telegram_id,
-            "alias": alias,
-            "totalGamesPlayed": 0,
-            "totalGamesWon": 0,
-            "totalGuesses": 0,
-            "currentStreak": 0,
-            "maxStreak": 0,
-            "firstPlayed": datetime.now(),
-            "lastPlayed": datetime.now()
+            "_id": telegram_id, "telegramId": telegram_id, "alias": alias,
+            "totalGamesPlayed": 0, "totalGamesWon": 0, "totalGuesses": 0,
+            "currentStreak": 0, "maxStreak": 0,
+            "firstPlayed": datetime.now(), "lastPlayed": datetime.now()
         }
-
-    if usuario is None:
         try:
-            await usuarios.insert_one(usuario_inicial)
+            usuarios.insert_one(usuario_inicial)
             logger.info(f"Nuevo usuario creado: {telegram_id}")
         except DuplicateKeyError:
             pass
 
-async def actualizar_derrota(telegram_id: int, intentos_usados: int) -> None:
+def actualizar_derrota(telegram_id: int, intentos_usados: int) -> None:
     # Si el usuario abandona (vuelve a darle al /play) se actualizan los stats de la partida que tenía en juego
-    await usuarios.update_one(
+    usuarios.update_one(
         {"_id": telegram_id},
         {
             "$inc": {
@@ -347,38 +327,6 @@ async def actualizar_derrota(telegram_id: int, intentos_usados: int) -> None:
         }
     )
     logger.info(f"Estadísticas de derrota (abandono) actualizadas para {telegram_id}")
-
-async def actualizar_victoria(telegram_id: int, intentos_usados: int) -> None:
-    # Actualiza los stats de un jugador tras la victoria
-    # Usamos $inc para incrementar contadores de forma atómica
-    # Usamos $max para actualizar la racha máxima solo si el valor es mayor
-    await usuarios.update_one(
-        {"_id": telegram_id},
-        {
-            "$inc": {
-                "totalGamesPlayed": 1,
-                "totalGamesWon": 1,
-                "totalGuesses": intentos_usados,
-                "currentStreak": 1
-            },
-            "$set": {
-                "lastPlayed": datetime.now()
-            }
-        }
-    )
-
-    # 2. SEGUNDA OPERACIÓN: Actualizar maxStreak
-    # Aquí usamos un $max para asegurarse de que maxStreak siempre sea el valor más alto.
-    # El valor de currentStreak ya se habrá incrementado en la DB.
-    await usuarios.update_one(
-        {"_id": telegram_id},
-        {
-            "$max": {
-                "maxStreak": "$currentStreak" # Usa el valor actual de currentStreak en la DB
-            }
-        }
-    )
-    logger.info(f"Estadísticas de victoria actualizadas para {telegram_id}")
 
 # =====================
 # COMANDOS DEL BOT
@@ -395,59 +343,141 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         print("ERROR: La colección de PERSONAJES y USUARIOS no se inicializó. Fallo de conexión a DB.")
 
     if usuarios is not None:
-        await asegurar_usuario_existe(telegram_id, update.effective_user)
+        asegurar_usuario_existe(telegram_id, update.effective_user)
     else:
         print("ERROR: La colección de usuarios no se inicializó. Fallo de conexión a DB.")
 
 async def play(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     telegram_id = update.effective_user.id
+    user_data = context.user_data
 
-    if context.user_data.get("juego_activo", False):
-        # El juego anterior se considera una DERROTA por abandono
-        intentos_usados = context.user_data.get("intentos_usados", 0) # Debe ser el total de intentos que llevaba
-        # Llama a la función de actualización de DB para la derrota
-        await actualizar_derrota(telegram_id, intentos_usados)
-        # Informa al usuario (opcional)
+    if user_data.get("juego_activo", False):
+        # Necesitas el secreto para registrar la derrota correctamente (solo para la racha, el contador ya fue registrado)
+        # Nota: La derrota resetea la racha, por lo que no hace falta pasar el secreto.
+        # Pero necesitas obtener las estadísticas para saber la racha previa y resetearla
+        # (Asumo que 'actualizar_derrota' es una función auxiliar que llama a la lógica DB)
+        #intentos_usados = user_data.get("intentos_usados", 0) # Debe ser el total de intentos que llevaba
+        #actualizar_derrota(telegram_id, intentos_usados)
+
+        stats = obtener_estadisticas_usuario(telegram_id)
+        racha_actual = stats.get("currentStreak", 0) if stats else 0
+        actualizar_estadisticas_usuario_win_loss(telegram_id, es_victoria=False, racha_actual=racha_actual)
+
         await update.message.reply_text("❌ Partida anterior abandonada. ¡Iniciando una nueva!")
-
     # Limpiamos los datos del juego anterior ANTES de empezar el nuevo
     context.user_data.clear()
-    # ----------------------------------------------
 
     # --- INSERCIÓN INICIAL (Si es la primera vez que juega) ---
     # La función debe buscar si el usuario existe y, si no, lo inserta.
-    await asegurar_usuario_existe(telegram_id, update.effective_user)
+    asegurar_usuario_existe(telegram_id, update.effective_user)
     # -----------------------------------------------------------
 
     # --- LÓGICA PARA INICIAR EL NUEVO JUEGO ---
     secreto = elegir_personaje()
-    context.user_data["secreto"] = secreto
+    context.user_data["personaje_secreto"] = secreto
+    user_data["juego_activo"] = True
+    user_data["intentos_usados"] = 0
     await update.message.reply_text("🔍 He elegido un personaje de One Piece. ¡Adivina quién es escribiendo su nombre!")
 
-async def intento(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    nombre = update.message.text.strip()
-    secreto = context.user_data.get("secreto")
+    # Sumamos 1 a totalGamesPlayed del usuario
+    registrar_inicio_partida(telegram_id)
 
-    if not secreto:
-        await update.message.reply_text("⚠️ Usa /play para comenzar una partida antes de intentar.")
+async def intento(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_id = update.effective_user.id
+    user_data = context.user_data
+
+    # --- VERIFICACIONES DE ESTADO DEL JUEGO ---
+    if not user_data.get("juego_activo"):
+        await update.message.reply_text("👋 ¡Bienvenido! Usa /play para comenzar una nueva partida.")
         return
+
+    nombre = update.message.text.strip()
+    secreto_data = user_data.get("personaje_secreto")
+
+    # Lógica de obtención de intentos usados
+    intentos_usados = user_data.get("intentos_usados", 0) + 1
+    user_data["intentos_usados"] = intentos_usados
+
+    # Control sobre el juego
+    es_victoria = False
+    juego_terminado = False
 
     intento_personaje = personajes.find_one({"Name": {"$regex": f"^{nombre}$", "$options": "i"}})
 
-    if not intento_personaje:
-        await update.message.reply_text("❌ No encontré ese personaje en la base de datos. Intenta con otro nombre.")
+    # --- LÓGICA DE JUEGO ---
+    # Si el personaje no está en la BBDD
+    if intento_personaje is None:
+        await update.message.reply_text(f"❌ El personaje '{nombre}' no se encuentra en la base de datos. Intenta con otro nombre.")
         return
 
-    if intento_personaje["Name"].lower() == secreto["Name"].lower():
-        detalles = formatear_personaje_acertado(secreto, update, context)
+    # Si el personaje es correcto (VICTORIA)
+    if intento_personaje["Name"].lower() == secreto_data["Name"].lower():
+        es_victoria = True
+        juego_terminado = True
+
+        detalles = formatear_personaje_acertado(secreto_data, update, context)
         await update.message.reply_text(
-            f"🎉 ¡Correcto! El personaje era {secreto['Name']} 🏴‍☠️\n\n{detalles}",
+            f"🎉 ¡Correcto! El personaje era {secreto_data['Name']} 🏴‍☠️\n\n{detalles}",
             parse_mode="HTML"
         )
-        context.user_data.clear()
+    # Lógica de Juego en Curso. Ha fallado el intento.
     else:
-        resultado = comparar_personajes(secreto, intento_personaje)
+        # Registrar intento fallido en la base de datos
+        registrar_intento_fallido(user_id)
+
+        resultado = comparar_personajes(secreto_data, intento_personaje)
         await update.message.reply_text(f"❌ No es {nombre}...\n\n{resultado}", parse_mode="HTML")
+        # PENSAR LÓGICA DE DERROTA
+
+    # --- LÓGICA FINAL DE ESTADÍSTICAS Y LIMPIEZA ---
+    if juego_terminado:
+        # Obtener estadísticas para la racha
+        stats = obtener_estadisticas_usuario(user_id)
+        racha_actual = stats.get("currentStreak", 0) if stats else 0
+
+        # Llamar a la función atómica de DB para la racha
+        actualizar_estadisticas_usuario_win_loss(
+            user_id=user_id,
+            es_victoria=es_victoria,
+            racha_actual=racha_actual
+        )
+
+        # Si perdió, hay que notificar la derrota (si no se hizo antes)
+        if not es_victoria:
+            await update.message.reply_text(
+                f"💀 ¡Has perdido! El personaje era **{secreto_data['Name']}**.",
+                parse_mode="Markdown"
+            )
+
+        # Limpieza de user_data
+        user_data["juego_activo"] = False
+        user_data.pop("personaje_secreto", None)
+        user_data.pop("intentos_usados", None)
+
+# async def intento(update: Update, context: ContextTypes.DEFAULT_TYPE):
+#     nombre = update.message.text.strip()
+#     secreto = context.user_data.get("secreto")
+#
+#     if not secreto:
+#         await update.message.reply_text("⚠️ Usa /play para comenzar una partida antes de intentar.")
+#         return
+#
+#     intento_personaje = personajes.find_one({"Name": {"$regex": f"^{nombre}$", "$options": "i"}})
+#
+#     if not intento_personaje:
+#         await update.message.reply_text("No encontré ese personaje en la base de datos. Intenta con otro nombre.")
+#         return
+#
+#     if intento_personaje["Name"].lower() == secreto["Name"].lower():
+#         detalles = formatear_personaje_acertado(secreto, update, context)
+#         await update.message.reply_text(
+#             f"🎉 ¡Correcto! El personaje era {secreto['Name']} 🏴‍☠️\n\n{detalles}",
+#             parse_mode="HTML"
+#         )
+#         context.user_data.clear()
+#     else:
+#         resultado = comparar_personajes(secreto, intento_personaje)
+#         await update.message.reply_text(f"❌ No es {nombre}...\n\n{resultado}", parse_mode="HTML")
 
 async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.from_user.id != ADMIN_IDS:
@@ -498,7 +528,7 @@ async def guia_comando(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         "Para empezar, usa el comando `/play` o escribe `@OPDLE_Dev_Bot` en cualquier chat."
     )
 
-    await update.message.reply_text(
+    update.message.reply_text(
         guia_text,
         parse_mode='Markdown' # Usamos Markdown para los títulos en negrita (**)
     )
@@ -509,16 +539,6 @@ async def guia_comando(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 # =====================
 
 def main():
-    usrdbenv = os.getenv("DB_USERNAME")
-    passdbenv = os.getenv("DB_PASSWORD")
-    cluster = os.getenv("CLUSTER_DB")
-    datadb = os.getenv("DATA_DB")
-    username = quote_plus(usrdbenv)
-    password = quote_plus(passdbenv)
-    uri = 'mongodb+srv://' + username + ':' + password + '@' + cluster.lower() + '.' + datadb + '.mongodb.net/?retryWrites=true&w=majority&appName=' + cluster
-
-    print("Conexion URI ", uri)
-    db_connection = init_db(uri, DB_NAME)
 
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
@@ -532,15 +552,4 @@ def main():
     app.run_polling()
 
 if __name__ == "__main__":
-    try:
-        is_connected = asyncio.run(verify_db_connection())
-    except Exception as e:
-        logger.critical(f"FALLO CRÍTICO EN ASYNCIO.RUN (DB): {e}")
-        is_connected = False
-
-    if not is_connected:
-        logger.critical("La conexión a la DB falló la autenticación/ping. El bot NO puede iniciarse.")
-        exit(1)
-
-    # INICIO DEL BOT SÍNCRONO (llamando al main modificado)
     main()
