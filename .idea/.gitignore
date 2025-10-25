@@ -3,3 +3,4 @@
 /workspace.xml
 .env
 test_db.py
+setup_db.py
