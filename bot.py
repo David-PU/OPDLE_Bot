@@ -1,9 +1,11 @@
+import asyncio
 import logging
 import os
 import random
 import re
 import uuid
 from datetime import datetime
+from urllib.parse import quote_plus
 
 from dotenv import load_dotenv
 from pymongo.errors import DuplicateKeyError
@@ -18,18 +20,17 @@ from telegram.ext import (
 )
 from telegram.ext import InlineQueryHandler
 
-from database import buscar_personajes_por_nombre
-from database import db
 from database import init_db
 from database import personajes, usuarios
+from database import verify_db_connection, buscar_personajes_por_nombre
 
 load_dotenv()
 
 # ===== CONFIGURACIÓN =====
 TOKEN = os.getenv("BOT_TOKEN_DEV")
 ADMIN_IDS = os.getenv("ADMIN_ID")
-MONGO_URI = os.getenv("MONGO_URI_REMOTE")
-DB_NAME = os.getenv("DB_NAME", "opdle_db")
+DB_NAME = os.getenv("DB_NAME")
+
 logger = logging.getLogger(__name__)
 
 # =====================
@@ -300,7 +301,11 @@ async def inline_query_handler(update, context):
 # =====================
 
 async def asegurar_usuario_existe(telegram_id: int, user_info) -> None:
-    # Se verifica si el usuario existe y si no lo crea
+
+    if usuarios is None:
+        logger.error("Colección 'usuarios' es None. Fallo de conexión a DB.")
+        raise RuntimeError("La base de datos no está inicializada o falló la conexión.")
+
     usuario = await usuarios.find_one({"_id": telegram_id})
 
     if usuario is None:
@@ -319,6 +324,7 @@ async def asegurar_usuario_existe(telegram_id: int, user_info) -> None:
             "lastPlayed": datetime.now()
         }
 
+    if usuario is None:
         try:
             await usuarios.insert_one(usuario_inicial)
             logger.info(f"Nuevo usuario creado: {telegram_id}")
@@ -381,24 +387,21 @@ async def actualizar_victoria(telegram_id: int, intentos_usados: int) -> None:
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("👋 ¡Bienvenido a OPDle! Un Wordle de One Piece.\nUsa /play para comenzar.",
                                     parse_mode="HTML")
-    usuario_inicial = {
-        "_id": update.effective_user.id,
-        "telegramId": update.effective_user.id,
-        "alias": update.effective_user.username or update.effective_user.first_name,
-        "totalGamesPlayed": 0,
-        "totalGamesWon": 0,
-        "totalGuesses": 0,
-        "currentStreak": 0,
-        "maxStreak": 0,
-        "firstPlayed": datetime.now(),
-        "lastPlayed": datetime.now()
-    }
-    db.usuarios.insert_one(usuario_inicial)
+
+    telegram_id = update.effective_user.id
+    if personajes is not None or usuarios is not None:
+        print("PERSONAJES y USUARIOS OK")
+    else:
+        print("ERROR: La colección de PERSONAJES y USUARIOS no se inicializó. Fallo de conexión a DB.")
+
+    if usuarios is not None:
+        await asegurar_usuario_existe(telegram_id, update.effective_user)
+    else:
+        print("ERROR: La colección de usuarios no se inicializó. Fallo de conexión a DB.")
 
 async def play(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     telegram_id = update.effective_user.id
-    # Lógica de abandono sin terminar partida
-    # Revisamos si el usuario tiene una partida activa
+
     if context.user_data.get("juego_activo", False):
         # El juego anterior se considera una DERROTA por abandono
         intentos_usados = context.user_data.get("intentos_usados", 0) # Debe ser el total de intentos que llevaba
@@ -407,19 +410,19 @@ async def play(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         # Informa al usuario (opcional)
         await update.message.reply_text("❌ Partida anterior abandonada. ¡Iniciando una nueva!")
 
-        # Limpiamos los datos del juego anterior ANTES de empezar el nuevo
-        context.user_data.clear()
-        # ----------------------------------------------
+    # Limpiamos los datos del juego anterior ANTES de empezar el nuevo
+    context.user_data.clear()
+    # ----------------------------------------------
 
-        # 2. --- INSERCIÓN INICIAL (Si es la primera vez que juega) ---
-        # La función debe buscar si el usuario existe y, si no, lo inserta.
-        await asegurar_usuario_existe(telegram_id, update.effective_user)
-        # -----------------------------------------------------------
+    # --- INSERCIÓN INICIAL (Si es la primera vez que juega) ---
+    # La función debe buscar si el usuario existe y, si no, lo inserta.
+    await asegurar_usuario_existe(telegram_id, update.effective_user)
+    # -----------------------------------------------------------
 
-        # 3. --- LÓGICA PARA INICIAR EL NUEVO JUEGO ---
-        secreto = elegir_personaje()
-        context.user_data["secreto"] = secreto
-        await update.message.reply_text("🔍 He elegido un personaje de One Piece. ¡Adivina quién es escribiendo su nombre!")
+    # --- LÓGICA PARA INICIAR EL NUEVO JUEGO ---
+    secreto = elegir_personaje()
+    context.user_data["secreto"] = secreto
+    await update.message.reply_text("🔍 He elegido un personaje de One Piece. ¡Adivina quién es escribiendo su nombre!")
 
 async def intento(update: Update, context: ContextTypes.DEFAULT_TYPE):
     nombre = update.message.text.strip()
@@ -506,27 +509,38 @@ async def guia_comando(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 # =====================
 
 def main():
+    usrdbenv = os.getenv("DB_USERNAME")
+    passdbenv = os.getenv("DB_PASSWORD")
+    cluster = os.getenv("CLUSTER_DB")
+    datadb = os.getenv("DATA_DB")
+    username = quote_plus(usrdbenv)
+    password = quote_plus(passdbenv)
+    uri = 'mongodb+srv://' + username + ':' + password + '@' + cluster.lower() + '.' + datadb + '.mongodb.net/?retryWrites=true&w=majority&appName=' + cluster
 
-    db_connection = init_db(MONGO_URI, DB_NAME)
-    if db_connection is None:
-        logger.critical("🚨 La conexión a la base de datos es NULA. El bot NO puede iniciarse sin DB.")
-        exit(1)
+    print("Conexion URI ", uri)
+    db_connection = init_db(uri, DB_NAME)
 
     app = ApplicationBuilder().token(TOKEN).build()
-
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("play", play))
-    #app.add_handler(CommandHandler("play", lambda u, c: play(u, c, db_connection)))
     app.add_handler(CommandHandler("reset", reset))
     app.add_handler(CommandHandler("guia", guia_comando))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, intento))
     app.add_handler(InlineQueryHandler(inline_query_handler))
 
-
-
-
     print("🤖 Bot OPDle en marcha...")
     app.run_polling()
 
 if __name__ == "__main__":
+    try:
+        is_connected = asyncio.run(verify_db_connection())
+    except Exception as e:
+        logger.critical(f"FALLO CRÍTICO EN ASYNCIO.RUN (DB): {e}")
+        is_connected = False
+
+    if not is_connected:
+        logger.critical("La conexión a la DB falló la autenticación/ping. El bot NO puede iniciarse.")
+        exit(1)
+
+    # INICIO DEL BOT SÍNCRONO (llamando al main modificado)
     main()
