@@ -7,21 +7,27 @@ from datetime import datetime
 
 from dotenv import load_dotenv
 from pymongo.errors import DuplicateKeyError
-from telegram import InlineQueryResultArticle, InputTextMessageContent
-from telegram import Update
+from telegram import (
+    InlineQueryResultArticle,
+    InputTextMessageContent, Update,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup
+)
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
     MessageHandler,
     filters,
     ContextTypes,
+    CallbackQueryHandler
 )
 from telegram.ext import InlineQueryHandler
 
 from database import (
     obtener_estadisticas_usuario, buscar_personajes_por_nombre,
     actualizar_estadisticas_usuario_win_loss, registrar_inicio_partida,
-    registrar_intento_fallido
+    registrar_intento_fallido, resetear_estadisticas_usuario,
+    obtener_ranking_global
 )
 from database import personajes, usuarios
 
@@ -38,7 +44,7 @@ logger = logging.getLogger(__name__)
 # FUNCIONES DE JUEGO
 # =====================
 
-def elegir_personaje(fixed_name="Nami"):
+def elegir_personaje(fixed_name=""):
     if fixed_name:
         query = {"Name": {"$regex": f"^{re.escape(fixed_name)}$", "$options": "i"}}
         encontrado = personajes.find_one(query)
@@ -495,13 +501,43 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     await update.message.reply_text(respuesta, parse_mode="Markdown")
 
-async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.message.from_user.id != ADMIN_IDS:
-        await update.message.reply_text("🚫 No tienes permiso para usar este comando.")
-        return
+async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Envía un mensaje de confirmación con teclado en línea para resetear las estadísticas."""
 
-    context.user_data.clear()
-    await update.message.reply_text("🔄 Juego reiniciado para este usuario.")
+    keyboard = [
+        [
+            InlineKeyboardButton("✅ Confirmar Reinicio", callback_data="reset_confirmado"),
+            InlineKeyboardButton("❌ Cancelar", callback_data="reset_cancelado")
+        ]
+    ]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await update.message.reply_text(
+        "⚠️ *ADVERTENCIA: Estás a punto de resetear todas tus estadísticas de juego (Partidas Jugadas, Ganadas, Rachas, Intentos).* Esta acción es irreversible.\n\n"
+        "¿Estás seguro de que quieres continuar?",
+        reply_markup=reply_markup,
+        parse_mode="Markdown"
+    )
+
+async def reset_confirmacion(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    user_id = query.from_user.id
+
+    # Contestar a la query inmediatamente para quitar el estado de 'cargando'
+    await query.answer()
+
+    # Lógica de confirmación
+    if query.data == "reset_confirmado":
+        resetear_estadisticas_usuario(user_id)
+
+        await query.edit_message_text(
+            "✅ *¡Estadísticas Reiniciadas!* Todos tus contadores han sido puestos a cero. ¡Empieza una nueva aventura con /play!",
+            parse_mode="Markdown"
+        )
+
+    elif query.data == "reset_cancelado":
+        await query.edit_message_text("❌ Reinicio cancelado. ¡Tus estadísticas están a salvo!")
 
 async def guia_comando(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Muestra la guía, las reglas y el significado de los iconos del juego."""
@@ -550,6 +586,43 @@ async def guia_comando(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     )
     logger.info("🟢 Guía enviada al usuario.")
 
+async def rank(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Muestra el ranking global de usuarios basado en la Media de Intentos por Victoria."""
+    await update.message.reply_text("⏳ Cargando el ranking global...", parse_mode="Markdown")
+
+    # Llamar a la función de la base de datos para obtener el ranking
+    ranking_data = obtener_ranking_global()
+
+    if not ranking_data:
+        await update.message.reply_text("😞 No hay suficientes datos (se requiere al menos una victoria) para generar un ranking.")
+        return
+
+    # Formatear la salida del ranking
+    respuesta = "👑 *Ranking Global: Media de Intentos por Victoria* 👑\n"
+    respuesta += "_(¡El valor MÁS BAJO es el mejor!)_\n\n"
+
+    for i, user in enumerate(ranking_data):
+        posicion = i + 1
+        nombre = user.get('alias', f"Usuario_{user.get('alias', 'Desconocido')}")
+        media_intentos = user.get('mediaIntentos', 0.0)
+
+        # Iconos para el TOP 3
+        if posicion == 1:
+            icono = "🥇"
+        elif posicion == 2:
+            icono = "🥈"
+        elif posicion == 3:
+            icono = "🥉"
+        else:
+            icono = f"{posicion}."
+
+        # Formateamos la media a 2 decimales y usamos el formato solicitado
+        respuesta += f"{icono} *{nombre}* con media de `{media_intentos:.2f}` aciertos por partida.\n"
+
+    respuesta += "\n¡Usa /stats para ver tu posición!"
+
+    await update.message.reply_text(respuesta, parse_mode="Markdown")
+
 # =====================
 # INICIO DEL BOT
 # =====================
@@ -560,8 +633,10 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("play", play))
     app.add_handler(CommandHandler("reset", reset))
+    app.add_handler(CallbackQueryHandler(reset_confirmacion))
     app.add_handler(CommandHandler("guia", guia_comando))
     app.add_handler(CommandHandler("stats", stats))
+    app.add_handler(CommandHandler("rank", rank))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, intento))
     app.add_handler(InlineQueryHandler(inline_query_handler))
 

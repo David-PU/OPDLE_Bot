@@ -1,11 +1,13 @@
 import logging
 import os
 from datetime import datetime
+from typing import List, Dict, Any
 from urllib.parse import quote_plus
 
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
+from pymongo.synchronous.cursor import Cursor
 
 logger = logging.getLogger(__name__)
 load_dotenv()
@@ -42,12 +44,6 @@ except Exception as e:
     db = None
     personajes = None
     usuarios = None
-
-# client = MongoClient(uri, server_api=ServerApi('1'))
-# db = client[db_name]
-#
-# personajes = db["personajes"]
-# usuarios = db["usuarios"]
 
 def buscar_personajes_por_nombre(query, limit=10):
     global personajes
@@ -173,6 +169,73 @@ def registrar_intento_fallido(user_id: int):
         logger.info(f"Intento registrado para {user_id}")
     except Exception as e:
         logger.error(f"Error al registrar intento para {user_id}: {e}")
+
+def resetear_estadisticas_usuario(user_id: int):
+    global usuarios
+
+    if usuarios is None:
+        logger.error("❌ Colección 'usuarios' no inicializada. No se puede resetear.")
+        return
+
+    try:
+        usuarios.update_one(
+            {"telegramId": user_id},
+            {
+                "$set": {
+                    "totalGamesPlayed": 0,
+                    "totalGamesWon": 0,
+                    "totalGuesses": 0,
+                    "currentStreak": 0,
+                    "maxStreak": 0,
+                    "lastPlayed": datetime.now()
+                }
+            }
+        )
+        logger.info(f"Estadísticas reseteadas para el usuario {user_id}")
+    except Exception as e:
+        logger.error(f"Error al resetear estadísticas del usuario {user_id}: {e}")
+
+def obtener_ranking_global(limite: int = 10) -> List[Dict[str, Any]]:
+    global usuarios
+    if usuarios is None:
+        logger.error("❌ Colección 'usuarios' no inicializada.")
+        return []
+
+    try:
+        pipeline = [
+            # Filtrar: Solo usuarios que hayan ganado al menos una partida
+            {"$match": {"totalGamesWon": {"$gt": 0}}},
+
+            # Calcular el campo 'mediaIntentos' (TotalGuesses / TotalGamesWon)
+            {"$addFields": {
+                "mediaIntentos": {
+                    "$divide": ["$totalGuesses", "$totalGamesWon"]
+                }
+            }},
+
+            # Ordenar: Por la media de intentos (ASCENDENTE, ya que un valor MÁS BAJO es mejor)
+            {"$sort": {"mediaIntentos": 1}},
+
+            # Limitar: A los N mejores jugadores
+            {"$limit": limite},
+
+            # Proyectar: Seleccionar solo los campos necesarios para el ranking
+            {"$project": {
+                "alias": 1,
+                "mediaIntentos": 1,
+                "_id": 0
+            }}
+        ]
+
+        # Ejecutar el pipeline de agregación
+        ranking_cursor: Cursor = usuarios.aggregate(pipeline)
+
+        # Convertir cursor a lista para devolver
+        return list(ranking_cursor)
+
+    except Exception as e:
+        logger.error(f"Error al obtener el ranking global por media: {e}")
+        return []
 
 def close_connection():
     global client
