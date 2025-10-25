@@ -31,6 +31,7 @@ load_dotenv()
 TOKEN = os.getenv("BOT_TOKEN_DEV")
 ADMIN_IDS = os.getenv("ADMIN_ID")
 
+#logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 # =====================
@@ -232,6 +233,8 @@ def haki_visual(val):
     s = str(val).upper().strip()
     if s == "" or s == "NONE":
         return "❌"
+    elif s == "UNKNOWN":
+        return "Desconocido"
     seen = []
     for ch in s:
         if ch in mapping and mapping[ch] not in seen:
@@ -332,56 +335,6 @@ def actualizar_derrota(telegram_id: int, intentos_usados: int) -> None:
 # COMANDOS DEL BOT
 # =====================
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("👋 ¡Bienvenido a OPDle! Un Wordle de One Piece.\nUsa /play para comenzar.",
-                                    parse_mode="HTML")
-
-    telegram_id = update.effective_user.id
-    if personajes is not None or usuarios is not None:
-        print("PERSONAJES y USUARIOS OK")
-    else:
-        print("ERROR: La colección de PERSONAJES y USUARIOS no se inicializó. Fallo de conexión a DB.")
-
-    if usuarios is not None:
-        asegurar_usuario_existe(telegram_id, update.effective_user)
-    else:
-        print("ERROR: La colección de usuarios no se inicializó. Fallo de conexión a DB.")
-
-async def play(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    telegram_id = update.effective_user.id
-    user_data = context.user_data
-
-    if user_data.get("juego_activo", False):
-        # Necesitas el secreto para registrar la derrota correctamente (solo para la racha, el contador ya fue registrado)
-        # Nota: La derrota resetea la racha, por lo que no hace falta pasar el secreto.
-        # Pero necesitas obtener las estadísticas para saber la racha previa y resetearla
-        # (Asumo que 'actualizar_derrota' es una función auxiliar que llama a la lógica DB)
-        #intentos_usados = user_data.get("intentos_usados", 0) # Debe ser el total de intentos que llevaba
-        #actualizar_derrota(telegram_id, intentos_usados)
-
-        stats = obtener_estadisticas_usuario(telegram_id)
-        racha_actual = stats.get("currentStreak", 0) if stats else 0
-        actualizar_estadisticas_usuario_win_loss(telegram_id, es_victoria=False, racha_actual=racha_actual)
-
-        await update.message.reply_text("❌ Partida anterior abandonada. ¡Iniciando una nueva!")
-    # Limpiamos los datos del juego anterior ANTES de empezar el nuevo
-    context.user_data.clear()
-
-    # --- INSERCIÓN INICIAL (Si es la primera vez que juega) ---
-    # La función debe buscar si el usuario existe y, si no, lo inserta.
-    asegurar_usuario_existe(telegram_id, update.effective_user)
-    # -----------------------------------------------------------
-
-    # --- LÓGICA PARA INICIAR EL NUEVO JUEGO ---
-    secreto = elegir_personaje()
-    context.user_data["personaje_secreto"] = secreto
-    user_data["juego_activo"] = True
-    user_data["intentos_usados"] = 0
-    await update.message.reply_text("🔍 He elegido un personaje de One Piece. ¡Adivina quién es escribiendo su nombre!")
-
-    # Sumamos 1 a totalGamesPlayed del usuario
-    registrar_inicio_partida(telegram_id)
-
 async def intento(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = update.effective_user.id
     user_data = context.user_data
@@ -454,30 +407,93 @@ async def intento(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         user_data.pop("personaje_secreto", None)
         user_data.pop("intentos_usados", None)
 
-# async def intento(update: Update, context: ContextTypes.DEFAULT_TYPE):
-#     nombre = update.message.text.strip()
-#     secreto = context.user_data.get("secreto")
-#
-#     if not secreto:
-#         await update.message.reply_text("⚠️ Usa /play para comenzar una partida antes de intentar.")
-#         return
-#
-#     intento_personaje = personajes.find_one({"Name": {"$regex": f"^{nombre}$", "$options": "i"}})
-#
-#     if not intento_personaje:
-#         await update.message.reply_text("No encontré ese personaje en la base de datos. Intenta con otro nombre.")
-#         return
-#
-#     if intento_personaje["Name"].lower() == secreto["Name"].lower():
-#         detalles = formatear_personaje_acertado(secreto, update, context)
-#         await update.message.reply_text(
-#             f"🎉 ¡Correcto! El personaje era {secreto['Name']} 🏴‍☠️\n\n{detalles}",
-#             parse_mode="HTML"
-#         )
-#         context.user_data.clear()
-#     else:
-#         resultado = comparar_personajes(secreto, intento_personaje)
-#         await update.message.reply_text(f"❌ No es {nombre}...\n\n{resultado}", parse_mode="HTML")
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("👋 ¡Bienvenido a OPDle! Un Wordle de One Piece.\nUsa /play para comenzar.",
+                                    parse_mode="HTML")
+
+    telegram_id = update.effective_user.id
+    if personajes is not None or usuarios is not None:
+        print("PERSONAJES y USUARIOS OK")
+    else:
+        print("ERROR: La colección de PERSONAJES y USUARIOS no se inicializó. Fallo de conexión a DB.")
+
+    if usuarios is not None:
+        asegurar_usuario_existe(telegram_id, update.effective_user)
+    else:
+        print("ERROR: La colección de usuarios no se inicializó. Fallo de conexión a DB.")
+
+async def play(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    telegram_id = update.effective_user.id
+    user_data = context.user_data
+
+    if user_data.get("juego_activo", False):
+        # Necesitas el secreto para registrar la derrota correctamente (solo para la racha, el contador ya fue registrado)
+        # Nota: La derrota resetea la racha, por lo que no hace falta pasar el secreto.
+        # Pero necesitas obtener las estadísticas para saber la racha previa y resetearla
+        # (Asumo que 'actualizar_derrota' es una función auxiliar que llama a la lógica DB)
+        #intentos_usados = user_data.get("intentos_usados", 0) # Debe ser el total de intentos que llevaba
+        #actualizar_derrota(telegram_id, intentos_usados)
+
+        stats = obtener_estadisticas_usuario(telegram_id)
+        racha_actual = stats.get("currentStreak", 0) if stats else 0
+        actualizar_estadisticas_usuario_win_loss(telegram_id, es_victoria=False, racha_actual=racha_actual)
+
+        await update.message.reply_text("❌ Partida anterior abandonada. ¡Iniciando una nueva!")
+    # Limpiamos los datos del juego anterior ANTES de empezar el nuevo
+    context.user_data.clear()
+
+    # --- INSERCIÓN INICIAL (Si es la primera vez que juega) ---
+    # La función debe buscar si el usuario existe y, si no, lo inserta.
+    asegurar_usuario_existe(telegram_id, update.effective_user)
+    # -----------------------------------------------------------
+
+    # --- LÓGICA PARA INICIAR EL NUEVO JUEGO ---
+    secreto = elegir_personaje()
+    context.user_data["personaje_secreto"] = secreto
+    user_data["juego_activo"] = True
+    user_data["intentos_usados"] = 0
+    await update.message.reply_text("🔍 He elegido un personaje de One Piece. ¡Adivina quién es escribiendo su nombre!")
+
+    # Sumamos 1 a totalGamesPlayed del usuario
+    registrar_inicio_partida(telegram_id)
+
+async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_id = update.effective_user.id
+
+    # Obtener datos del usuario
+    stats_data = obtener_estadisticas_usuario(user_id)
+
+    if not stats_data or stats_data.get("totalGamesPlayed", 0) == 0:
+        await update.message.reply_text(
+            "📊 Aún no tienes estadísticas registradas. ¡Usa /play para empezar a jugar!",
+            parse_mode="HTML"
+        )
+        return
+
+    # Extraer datos y calcular la Media de aciertos
+    juegos_jugados = stats_data.get("totalGamesPlayed", 0)
+    total_intentos = stats_data.get("totalGuesses", 0)
+
+    # Cálculo: Media = TotalIntentos / PartidasJugadas. Manejamos la división por cero.
+    media_aciertos = total_intentos / juegos_jugados if juegos_jugados > 0 else 0
+
+    # Determinamos el porcentaje de victorias
+    partidas_ganadas = stats_data.get("totalGamesWon", 0)
+    porcentaje_victorias = (partidas_ganadas / juegos_jugados) * 100 if juegos_jugados > 0 else 0
+
+    # Formato de la respuesta
+    respuesta = (
+        "⚔️ *Tus Estadísticas en OPDle* ⚔️\n\n"
+        f"🏆 Partidas Ganadas: `{partidas_ganadas}` ({porcentaje_victorias:.1f}%)\n"
+        f"🕹️ Partidas Totales: `{juegos_jugados}`\n"
+        f"💭 Total de Intentos: `{total_intentos}`\n"
+        f"📊 *Media de Intentos: {media_aciertos:.2f}*\n"
+        f"🔥 Racha Actual: `{stats_data.get('currentStreak', 0)}`\n"
+        f"🌟 Mayor Racha: `{stats_data.get('maxStreak', 0)}`\n\n"
+        "¡Mucha suerte en los siguientes 🏴‍☠️!"
+    )
+
+    await update.message.reply_text(respuesta, parse_mode="Markdown")
 
 async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.from_user.id != ADMIN_IDS:
@@ -528,7 +544,7 @@ async def guia_comando(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         "Para empezar, usa el comando `/play` o escribe `@OPDLE_Dev_Bot` en cualquier chat."
     )
 
-    update.message.reply_text(
+    await update.message.reply_text(
         guia_text,
         parse_mode='Markdown' # Usamos Markdown para los títulos en negrita (**)
     )
@@ -545,6 +561,7 @@ def main():
     app.add_handler(CommandHandler("play", play))
     app.add_handler(CommandHandler("reset", reset))
     app.add_handler(CommandHandler("guia", guia_comando))
+    app.add_handler(CommandHandler("stats", stats))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, intento))
     app.add_handler(InlineQueryHandler(inline_query_handler))
 
