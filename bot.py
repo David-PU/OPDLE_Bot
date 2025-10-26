@@ -145,7 +145,7 @@ def comparar_personajes(secreto, intento):
                 emoji = "🔺"
             elif num_secreto < num_intento:
                 emoji = "🔻"
-            display = "Capítulo " + val_intento
+            display = str(intento.get("Arc", "")).strip()
 
         elif num_secreto is not None and num_intento is not None:
             if num_secreto > num_intento:
@@ -165,6 +165,11 @@ def comparar_personajes(secreto, intento):
                 display = "Desconocida"
             else:
                 display = f"{val_intento} cm"
+        if key == "Org":
+            if val_intento in ["Unknown", "None"]:
+                display = "Desconocida"
+            else:
+                display = val_intento
 
 
         display_key = field_map.get(key, key)
@@ -311,7 +316,7 @@ def asegurar_usuario_existe(telegram_id: int, user_info) -> None:
         usuario_inicial = {
             "_id": telegram_id, "telegramId": telegram_id, "alias": alias,
             "totalGamesPlayed": 0, "totalGamesWon": 0, "totalGuesses": 0,
-            "currentStreak": 0, "maxStreak": 0,
+            "currentStreak": 0, "maxStreak": 0, "lastChapter": 1000,
             "firstPlayed": datetime.now(), "lastPlayed": datetime.now()
         }
         try:
@@ -366,10 +371,11 @@ async def intento(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # --- LÓGICA DE JUEGO ---
     # Si el personaje no está en la BBDD
     if intento_personaje is None:
+        user_data["intentos_usados"] = intentos_usados - 1
         await update.message.reply_text(f"❌ El personaje '{nombre}' no se encuentra en la base de datos. Intenta con otro nombre.")
         return
 
-    # Si el personaje es correcto (VICTORIA)
+    # Si el personaje es correcto
     if intento_personaje["Name"].lower() == secreto_data["Name"].lower():
         es_victoria = True
         juego_terminado = True
@@ -381,11 +387,32 @@ async def intento(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         )
     # Lógica de Juego en Curso. Ha fallado el intento.
     else:
-        # Registrar intento fallido en la base de datos
         registrar_intento_fallido(user_id)
-
         resultado = comparar_personajes(secreto_data, intento_personaje)
-        await update.message.reply_text(f"❌ No es {nombre}...\n\n{resultado}", parse_mode="HTML")
+        pistas_texto = f"<code>Intentos --> {intentos_usados}.</code>\n"
+
+        # Lógica de PISTAS
+        if intentos_usados >= 8:
+            fruta = secreto_data.get("Devilfruit")
+            if fruta in ["None", "Unknown"]:
+                fruta = "Sin Fruta"
+            pistas_texto += f"<code>• Fruta del Diablo: {fruta}</code>\n"
+        else:
+            pistas_texto += f"<code>• Pista de Fruta en {8-intentos_usados} intentos.</code>\n"
+
+        if intentos_usados >= 14:
+            capitulo = secreto_data.get("Saga")
+            pistas_texto += f"<code>• Aparece en la saga: {capitulo}</code>\n"
+        else:
+            pistas_texto += f"<code>• Pista de Saga en {14-intentos_usados} intentos.</code>\n"
+
+        mensaje_final = (
+            f"❌ No es {nombre}...\n\n"
+            f"{pistas_texto}\n"  
+            f"{resultado}"
+        )
+
+        await update.message.reply_text(mensaje_final, parse_mode="HTML")
         # PENSAR LÓGICA DE DERROTA
 
     # --- LÓGICA FINAL DE ESTADÍSTICAS Y LIMPIEZA ---
@@ -458,7 +485,8 @@ async def play(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     context.user_data["personaje_secreto"] = secreto
     user_data["juego_activo"] = True
     user_data["intentos_usados"] = 0
-    await update.message.reply_text("🔍 He elegido un personaje de One Piece. ¡Adivina quién es escribiendo su nombre!")
+    await update.message.reply_text("🔍 He elegido un personaje de One Piece. ¡Adivina quién es escribiendo su nombre!\n"
+                                    "🧩 Tendrás una pista en el intento 8 y otra en el 14.\n")
 
     # Sumamos 1 a totalGamesPlayed del usuario
     registrar_inicio_partida(telegram_id)
@@ -540,7 +568,6 @@ async def reset_confirmacion(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await query.edit_message_text("❌ Reinicio cancelado. ¡Tus estadísticas están a salvo!")
 
 async def guia_comando(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Muestra la guía, las reglas y el significado de los iconos del juego."""
     logger.info(f"🔵 Comando /guia recibido por User ID: {update.effective_user.id}")
 
     guia_text = (
@@ -576,8 +603,13 @@ async def guia_comando(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         "⚠️ **¡CUIDADO!** La base de datos contiene personajes, habilidades, recompensas "
         "y afiliaciones actualizadas **hasta el último capítulo del manga**. "
         "Juega bajo tu propio riesgo de **SPOILERS**.\n\n"
+        
+        "--- **SOBRE LOS DATOS MOSTRADOS** ---\n"
+        "📖 **¡OJO!** Todos los datos que verás durante la partida están sacados de la Wiki"
+        "y actualizados hasta el último capítulo del Manga. Si ves alguna discrepancia no dudes"
+        "en ponerte en contacto con nosotros en opdle.bot@gmail.com.\n\n"
 
-        "Para empezar, usa el comando `/play` o escribe `@OPDLE_Dev_Bot` en cualquier chat."
+        "Para empezar, usa el comando `/play`"
     )
 
     await update.message.reply_text(

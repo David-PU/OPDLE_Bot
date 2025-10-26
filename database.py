@@ -25,12 +25,6 @@ username = quote_plus(usrdbenv)
 password = quote_plus(passdbenv)
 uri = 'mongodb+srv://' + username + ':' + password + '@' + cluster.lower() + '.' + datadb + '.mongodb.net/?retryWrites=true&w=majority&appName=' + cluster
 
-print("--- INICIO DEBUG ---")
-print("DB_USERNAME:", usrdbenv)
-print("DB_PASSWORD:", passdbenv) # OJO: Solo para debug temporal, luego ELIMÍNALO
-print("URI COMPLETA:", uri)
-print("--- FIN DEBUG ---")
-
 try:
     client = MongoClient(uri, server_api=ServerApi('1'))
     db = client[db_name]
