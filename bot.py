@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 # FUNCIONES DE JUEGO
 # =====================
 
-def elegir_personaje(fixed_name=""):
+def elegir_personaje(fixed_name="Shirahoshi"):
     if fixed_name:
         query = {"Name": {"$regex": f"^{re.escape(fixed_name)}$", "$options": "i"}}
         encontrado = personajes.find_one(query)
@@ -139,12 +139,7 @@ def comparar_personajes(secreto, intento):
             display = formatted_bounty_i if key == "Bounty" else (val_intento or "None")
 
         elif key == "Appears" and num_secreto is not None and num_intento is not None:
-            if num_secreto == num_intento:
-                emoji = "🟩"
-            elif num_secreto > num_intento:
-                emoji = "🔺"
-            elif num_secreto < num_intento:
-                emoji = "🔻"
+            emoji = comparar_arcos(intento, secreto)
             display = str(intento.get("Arc", "")).strip()
 
         elif num_secreto is not None and num_intento is not None:
@@ -175,9 +170,7 @@ def comparar_personajes(secreto, intento):
         display_key = field_map.get(key, key)
         rows.append((display_key, emoji, str(display)))
 
-    # Calcular anchos para alineado
     key_w = max(len(r[0]) for r in rows)
-    # El ancho máximo de la columna de emoji es 2 (por "🟥⬆️")
     emoji_w = max(len(r[1]) for r in rows) # Esto será 2
     val_w = max(len(r[2]) for r in rows)
 
@@ -219,9 +212,14 @@ def formatear_personaje_acertado(personaje, update, context):
         elif c == "Height":
             display = (val or "None") + " cm"
         elif c == "Appears":
-            display = "Chapter " + (val or "None")
+            display = personaje.get("Arc", "")
         elif c == "Haki":
             display = haki_visual(val)
+        elif c == "DevilFruitType":
+            if val in ["None", "Unknown"]:
+                display = "Sin Fruta"
+            else:
+                display = val
         else:
             display = val or "None"
 
@@ -241,18 +239,18 @@ def haki_visual(val):
     mapping = {"O": "👁️", "A": "🦾", "C": "👑"}
     if val is None:
         return "None"
-    s = str(val).upper().strip()
-    if s == "" or s == "NONE":
-        return "❌"
-    elif s == "UNKNOWN":
+    val_aux = str(val).upper().strip()
+    if val_aux == "" or val_aux == "NONE":
+        return "Sin Haki"
+    elif val_aux == "UNKNOWN":
         return "Desconocido"
     seen = []
-    for ch in s:
+    for ch in val_aux:
         if ch in mapping and mapping[ch] not in seen:
             seen.append(mapping[ch])
         elif ch not in mapping and ch not in seen:
             seen.append(ch)
-    return "".join(seen) if seen else s
+    return "".join(seen) if seen else val_aux
 
 def format_bounty(val):
     BERRIE_SYMBOL = "💰"
@@ -280,6 +278,19 @@ def format_bounty(val):
         return f"{BERRIE_SYMBOL}{n // 1_000_000} M"
     else:
         return f"{BERRIE_SYMBOL}{s}"
+
+def comparar_arcos(intento, secreto):
+    chptr_intento = intento.get("Appears", "")
+    chptr_secreto = secreto.get("Appears", "")
+    arc_intento = intento.get("Arc", "")
+    arc_secreto = secreto.get("Arc", "")
+
+    if arc_secreto == arc_intento and arc_secreto is not None and arc_intento is not None:
+        return "🟩"
+    elif chptr_secreto > chptr_intento:
+        return "🔺"
+    elif chptr_secreto < chptr_intento:
+        return "🔻"
 
 async def inline_query_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.inline_query.query
@@ -316,7 +327,7 @@ def asegurar_usuario_existe(telegram_id: int, user_info) -> None:
         usuario_inicial = {
             "_id": telegram_id, "telegramId": telegram_id, "alias": alias,
             "totalGamesPlayed": 0, "totalGamesWon": 0, "totalGuesses": 0,
-            "currentStreak": 0, "maxStreak": 0, "lastChapter": 1000,
+            "currentStreak": 0, "maxStreak": 0, "lastChapter": 1000, #TODO AÑADIR EN BBDD
             "firstPlayed": datetime.now(), "lastPlayed": datetime.now()
         }
         try:
@@ -361,6 +372,10 @@ async def intento(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # Lógica de obtención de intentos usados
     intentos_usados = user_data.get("intentos_usados", 0) + 1
     user_data["intentos_usados"] = intentos_usados
+
+    # Si es el primer intento, sumamos una partida jugada
+    if intentos_usados == 1:
+        registrar_inicio_partida(user_id)
 
     # Control sobre el juego
     es_victoria = False
@@ -413,7 +428,7 @@ async def intento(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         )
 
         await update.message.reply_text(mensaje_final, parse_mode="HTML")
-        # PENSAR LÓGICA DE DERROTA
+    # PENSAR LÓGICA DE DERROTA
 
     # --- LÓGICA FINAL DE ESTADÍSTICAS Y LIMPIEZA ---
     if juego_terminado:
@@ -488,9 +503,6 @@ async def play(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text("🔍 He elegido un personaje de One Piece. ¡Adivina quién es escribiendo su nombre!\n"
                                     "🧩 Tendrás una pista en el intento 8 y otra en el 14.\n")
 
-    # Sumamos 1 a totalGamesPlayed del usuario
-    registrar_inicio_partida(telegram_id)
-
 async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = update.effective_user.id
 
@@ -507,12 +519,11 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # Extraer datos y calcular la Media de aciertos
     juegos_jugados = stats_data.get("totalGamesPlayed", 0)
     total_intentos = stats_data.get("totalGuesses", 0)
+    partidas_ganadas = stats_data.get("totalGamesWon", 0)
 
-    # Cálculo: Media = TotalIntentos / PartidasJugadas. Manejamos la división por cero.
-    media_aciertos = total_intentos / juegos_jugados if juegos_jugados > 0 else 0
+    media_aciertos = total_intentos / partidas_ganadas if juegos_jugados > 0 else 0
 
     # Determinamos el porcentaje de victorias
-    partidas_ganadas = stats_data.get("totalGamesWon", 0)
     porcentaje_victorias = (partidas_ganadas / juegos_jugados) * 100 if juegos_jugados > 0 else 0
 
     # Formato de la respuesta
@@ -521,7 +532,7 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         f"🏆 Partidas Ganadas: `{partidas_ganadas}` ({porcentaje_victorias:.1f}%)\n"
         f"🕹️ Partidas Totales: `{juegos_jugados}`\n"
         f"💭 Total de Intentos: `{total_intentos}`\n"
-        f"📊 *Media de Intentos: {media_aciertos:.2f}*\n"
+        f"📊 *Media de Intentos: {media_aciertos.__round__()}*\n"
         f"🔥 Racha Actual: `{stats_data.get('currentStreak', 0)}`\n"
         f"🌟 Mayor Racha: `{stats_data.get('maxStreak', 0)}`\n\n"
         "¡Mucha suerte en los siguientes 🏴‍☠️!"
@@ -619,10 +630,8 @@ async def guia_comando(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     logger.info("🟢 Guía enviada al usuario.")
 
 async def rank(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Muestra el ranking global de usuarios basado en la Media de Intentos por Victoria."""
     await update.message.reply_text("⏳ Cargando el ranking global...", parse_mode="Markdown")
 
-    # Llamar a la función de la base de datos para obtener el ranking
     ranking_data = obtener_ranking_global()
 
     if not ranking_data:

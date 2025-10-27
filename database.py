@@ -89,7 +89,6 @@ def actualizar_estadisticas_usuario_win_loss(user_id: int, es_victoria: bool, ra
 
     if es_victoria:
         # LÓGICA DE VICTORIA
-
         # 1. Incrementar totalGamesWon
         inc_ops["totalGamesWon"] = 1
         inc_ops["totalGuesses"] = 1
@@ -124,9 +123,6 @@ def actualizar_estadisticas_usuario_win_loss(user_id: int, es_victoria: bool, ra
         logger.error(f"Error al actualizar racha del usuario {user_id}: {e}")
 
 def registrar_inicio_partida(user_id: int):
-    """
-    Incrementa totalGamesPlayed y actualiza la fecha de última partida al inicio de /play.
-    """
     global usuarios
     if usuarios is None:
         logger.error("❌ Colección 'usuarios' no inicializada.")
@@ -137,7 +133,7 @@ def registrar_inicio_partida(user_id: int):
             {"telegramId": user_id},
             {
                 "$inc": {"totalGamesPlayed": 1},
-                "$set": {"lastPlayed": datetime.utcnow()} # Usar UTC para consistencia
+                "$set": {"lastPlayed": datetime.utcnow()}
             },
             upsert=True
         )
@@ -207,13 +203,13 @@ def obtener_ranking_global(limite: int = 10) -> List[Dict[str, Any]]:
                 }
             }},
 
-            # Ordenar: Por la media de intentos (ASCENDENTE, ya que un valor MÁS BAJO es mejor)
+            # Por la media de intentos (ASCENDENTE, ya que un valor MÁS BAJO es mejor)
             {"$sort": {"mediaIntentos": 1}},
 
-            # Limitar: A los N mejores jugadores
+            # A los N mejores jugadores
             {"$limit": limite},
 
-            # Proyectar: Seleccionar solo los campos necesarios para el ranking
+            # Seleccionar solo los campos necesarios para el ranking
             {"$project": {
                 "alias": 1,
                 "mediaIntentos": 1,
