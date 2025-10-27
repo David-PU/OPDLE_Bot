@@ -541,8 +541,6 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(respuesta, parse_mode="Markdown")
 
 async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Envía un mensaje de confirmación con teclado en línea para resetear las estadísticas."""
-
     keyboard = [
         [
             InlineKeyboardButton("✅ Confirmar Reinicio", callback_data="reset_confirmado"),
@@ -658,7 +656,7 @@ async def rank(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             icono = f"{posicion}."
 
         # Formateamos la media a 2 decimales y usamos el formato solicitado
-        respuesta += f"{icono} *{nombre}* con media de `{media_intentos:.2f}` aciertos por partida.\n"
+        respuesta += f"{icono} *{nombre}* con media de `{media_intentos:.2f}` intentos por partida.\n"
 
     respuesta += "\n¡Usa /stats para ver tu posición!"
 
