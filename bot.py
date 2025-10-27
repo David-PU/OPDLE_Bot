@@ -631,9 +631,8 @@ async def rank(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text("⏳ Cargando el ranking global...", parse_mode="Markdown")
 
     ranking_data = obtener_ranking_global()
-
     if not ranking_data:
-        await update.message.reply_text("😞 No hay suficientes datos (se requiere al menos una victoria) para generar un ranking.")
+        await update.message.reply_text("😞 No hay suficientes datos (se requiere al menos 5 victorias) para generar un ranking.")
         return
 
     # Formatear la salida del ranking

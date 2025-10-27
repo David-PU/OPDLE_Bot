@@ -193,8 +193,8 @@ def obtener_ranking_global(limite: int = 10) -> List[Dict[str, Any]]:
 
     try:
         pipeline = [
-            # Filtrar: Solo usuarios que hayan ganado al menos una partida
-            {"$match": {"totalGamesWon": {"$gt": 0}}},
+            # Filtrar: Solo usuarios que hayan ganado al menos 4 partidas
+            {"$match": {"totalGamesWon": {"$gt": 4}}},
 
             # Calcular el campo 'mediaIntentos' (TotalGuesses / TotalGamesWon)
             {"$addFields": {
