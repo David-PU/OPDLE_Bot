@@ -77,12 +77,6 @@ def comparar_personajes(secreto, intento):
 
     rows = []
 
-    def to_number(val):
-        try:
-            return float(str(val).replace(",", "").replace(" ", ""))
-        except ValueError:
-            return None
-
     for key in campos:
         val_secreto = str(secreto.get(key, "")).strip()
         val_intento = str(intento.get(key, "")).strip()
@@ -284,12 +278,14 @@ def comparar_arcos(intento, secreto):
     chptr_secreto = secreto.get("Appears", "")
     arc_intento = intento.get("Arc", "")
     arc_secreto = secreto.get("Arc", "")
+    chptr_nmbr_intento = to_number(chptr_intento)
+    chptr_nmbr_secreto = to_number(chptr_secreto)
 
     if arc_secreto == arc_intento and arc_secreto is not None and arc_intento is not None:
         return "🟩"
-    elif chptr_secreto > chptr_intento:
+    elif chptr_nmbr_secreto > chptr_nmbr_intento:
         return "🔺"
-    elif chptr_secreto < chptr_intento:
+    elif chptr_nmbr_secreto < chptr_nmbr_intento:
         return "🔻"
 
 async def inline_query_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -310,6 +306,12 @@ async def inline_query_handler(update: Update, context: ContextTypes.DEFAULT_TYP
         )
     # Llamada SÍNCRONA a la API de Telegram
     await update.inline_query.answer(articulos, cache_time=5)
+
+def to_number(val):
+    try:
+        return float(str(val).replace(",", "").replace(" ", ""))
+    except ValueError:
+        return None
 
 # =====================
 # FUNCIONES DE BBDD
