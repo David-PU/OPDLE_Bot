@@ -505,10 +505,10 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # Formato de la respuesta
     respuesta = (
         "⚔️ *Tus Estadísticas en OPDle* ⚔️\n\n"
-        f"🏆 Partidas Ganadas: `{partidas_ganadas}` ({porcentaje_victorias:.1f}%)\n"
+        f"🏆 Partidas Ganadas: `{partidas_ganadas}` ({porcentaje_victorias:.2f}%)\n"
         f"🕹️ Partidas Totales: `{juegos_jugados}`\n"
         f"💭 Total de Intentos: `{total_intentos}`\n"
-        f"📊 *Media de Intentos: {media_aciertos.__round__()}*\n"
+        f"📊 *Media de Intentos: {media_aciertos:2f}*\n"
         f"🔥 Racha Actual: `{stats_data.get('currentStreak', 0)}`\n"
         f"🌟 Mayor Racha: `{stats_data.get('maxStreak', 0)}`\n\n"
         "¡Mucha suerte en los siguientes 🏴‍☠️!"
@@ -634,7 +634,7 @@ async def rank(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             else: icono = f"{posicion}."
 
             # Formateamos la media a 2 decimales
-            respuesta += f"{icono} *{nombre}* con `{media_intentos:.1f}` intentos por partida.\n"
+            respuesta += f"{icono} *{nombre}* con `{media_intentos:.2f}` intentos por partida.\n"
 
     # --- Añadir posición del jugador si NO está en el TOP 10 ---
     if posicion_usuario > 0:
@@ -644,11 +644,12 @@ async def rank(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
             respuesta += "\n"
             respuesta += f"⭐ ¡Tu posición actual es: *{posicion_usuario}*! ⭐\n"
-            respuesta += f"Tu media es: `{media_usuario:.1f}` aciertos por partida.\n"
+            respuesta += f"Tu media es: `{media_usuario:.2f}` aciertos por partida.\n"
         elif posicion_usuario > 0 and posicion_usuario <= 10:
             respuesta += "\n¡Felicidades, estás en el TOP 10! 🎉"
     elif posicion_usuario == 0:
-        respuesta += "\n_(Necesitas al menos una victoria para aparecer en el ranking.)_"
+        respuesta += (f"\n_(Necesitas al menos {stats_usuario['requisito_minimo']} victorias para aparecer en el ranking. "
+                      f"\n¡Sigue jugando!)_")
 
     await update.message.reply_text(respuesta, parse_mode="Markdown")
 

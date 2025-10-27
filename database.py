@@ -229,6 +229,8 @@ def obtener_ranking_global(limite: int = 10) -> List[Dict[str, Any]]:
 
 def obtener_posicion_usuario(user_id: int) -> Dict[str, Any]:
     global usuarios
+    VICTORIES_REQUIRED = 5
+
     if usuarios is None:
         logger.error("❌ Colección 'usuarios' no inicializada.")
         return {"posicion": 0}
@@ -237,23 +239,28 @@ def obtener_posicion_usuario(user_id: int) -> Dict[str, Any]:
         # Pipeline para obtener la media del usuario y compararla con el resto
 
         # 1. Calcular la media del usuario actual
-        media_usuario = usuarios.aggregate([
-            {"$match": {"telegramId": user_id, "totalGamesWon": {"$gt": 0}}},
+        # REQUISITO DE FILTRO: totalGamesWon debe ser >= 5
+        media_usuario_cursor = usuarios.aggregate([
+            {"$match": {"telegramId": user_id, "totalGamesWon": {"$gte": VICTORIES_REQUIRED}}},
             {"$addFields": {
                 "mediaIntentos": {"$divide": ["$totalGuesses", "$totalGamesWon"]}
             }},
-            {"$project": {"mediaIntentos": 1, "alias": 1, "_id": 0}}
-        ]).next()
+            {"$project": {"mediaIntentos": 1, "alias": 1, "totalGamesWon": 1, "_id": 0}}
+        ])
+
+        # Intentamos obtener el primer (y único) resultado
+        media_usuario = next(media_usuario_cursor, None)
 
         # Si el usuario no ha ganado o no existe, salimos
         if not media_usuario:
-            return {"posicion": 0}
+            # Añadimos un campo 'requisito' para que el bot pueda mostrar un mensaje de error específico
+            return {"posicion": 0, "requisito_minimo": VICTORIES_REQUIRED}
 
         # Contar cuántos usuarios tienen una media de intentos MEJOR (menor) que la suya
         media_a_comparar = media_usuario["mediaIntentos"]
 
         conteo_mejores = usuarios.count_documents({
-            "totalGamesWon": {"$gt": 0},
+            "totalGamesWon": {"$gte": VICTORIES_REQUIRED},
             "$expr": {
                 "$lt": [
                     {"$divide": ["$totalGuesses", "$totalGamesWon"]},
