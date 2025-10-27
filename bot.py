@@ -27,7 +27,7 @@ from database import (
     obtener_estadisticas_usuario, buscar_personajes_por_nombre,
     actualizar_estadisticas_usuario_win_loss, registrar_inicio_partida,
     registrar_intento_fallido, resetear_estadisticas_usuario,
-    obtener_ranking_global
+    obtener_ranking_global, obtener_posicion_usuario
 )
 from database import personajes, usuarios
 
@@ -327,7 +327,7 @@ def asegurar_usuario_existe(telegram_id: int, user_info) -> None:
         usuario_inicial = {
             "_id": telegram_id, "telegramId": telegram_id, "alias": alias,
             "totalGamesPlayed": 0, "totalGamesWon": 0, "totalGuesses": 0,
-            "currentStreak": 0, "maxStreak": 0, "lastChapter": 1000, #TODO AÑADIR EN BBDD
+            "currentStreak": 0, "maxStreak": 0, "lastChapter": 0, #TODO AÑADIR EN BBDD
             "firstPlayed": datetime.now(), "lastPlayed": datetime.now()
         }
         try:
@@ -335,23 +335,6 @@ def asegurar_usuario_existe(telegram_id: int, user_info) -> None:
             logger.info(f"Nuevo usuario creado: {telegram_id}")
         except DuplicateKeyError:
             pass
-
-def actualizar_derrota(telegram_id: int, intentos_usados: int) -> None:
-    # Si el usuario abandona (vuelve a darle al /play) se actualizan los stats de la partida que tenía en juego
-    usuarios.update_one(
-        {"_id": telegram_id},
-        {
-            "$inc": {
-                "totalGamesPlayed": 1,
-                "totalGuesses": intentos_usados
-            },
-            "$set": {
-                "currentStreak": 0,
-                "lastPlayed": datetime.now()
-            }
-        }
-    )
-    logger.info(f"Estadísticas de derrota (abandono) actualizadas para {telegram_id}")
 
 # =====================
 # COMANDOS DEL BOT
@@ -475,13 +458,6 @@ async def play(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_data = context.user_data
 
     if user_data.get("juego_activo", False):
-        # Necesitas el secreto para registrar la derrota correctamente (solo para la racha, el contador ya fue registrado)
-        # Nota: La derrota resetea la racha, por lo que no hace falta pasar el secreto.
-        # Pero necesitas obtener las estadísticas para saber la racha previa y resetearla
-        # (Asumo que 'actualizar_derrota' es una función auxiliar que llama a la lógica DB)
-        #intentos_usados = user_data.get("intentos_usados", 0) # Debe ser el total de intentos que llevaba
-        #actualizar_derrota(telegram_id, intentos_usados)
-
         stats = obtener_estadisticas_usuario(telegram_id)
         racha_actual = stats.get("currentStreak", 0) if stats else 0
         actualizar_estadisticas_usuario_win_loss(telegram_id, es_victoria=False, racha_actual=racha_actual)
@@ -628,38 +604,74 @@ async def guia_comando(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     logger.info("🟢 Guía enviada al usuario.")
 
 async def rank(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_id = update.effective_user.id
+
     await update.message.reply_text("⏳ Cargando el ranking global...", parse_mode="Markdown")
 
-    ranking_data = obtener_ranking_global()
+    # Obtener el TOP 10 (LIMITADO)
+    ranking_data = obtener_ranking_global(limite=10)
+
+    # Obtener la POSICIÓN REAL del usuario que ejecuta el comando
+    stats_usuario = obtener_posicion_usuario(user_id)
+    posicion_usuario = stats_usuario.get("posicion", 0)
+
+    # --- Generación del mensaje del TOP 10 ---
     if not ranking_data:
-        await update.message.reply_text("😞 No hay suficientes datos (se requiere al menos 5 victorias) para generar un ranking.")
-        return
+        respuesta = "😞 No hay suficientes datos (se requiere al menos una victoria) para generar un ranking."
+    else:
+        respuesta = "👑 *Ranking Global: Media de Intentos por Victoria* 👑\n"
+        respuesta += "_(¡El valor MÁS BAJO es el mejor!)_\n\n"
 
-    # Formatear la salida del ranking
-    respuesta = "👑 *Ranking Global: Media de Intentos por Victoria* 👑\n"
-    respuesta += "_(¡El valor MÁS BAJO es el mejor!)_\n\n"
+        for i, user in enumerate(ranking_data):
+            posicion = i + 1
+            nombre = user.get('alias', f"Usuario_{user.get('alias', 'Desconocido')}")
+            media_intentos = user.get('mediaIntentos', 0)
 
-    for i, user in enumerate(ranking_data):
-        posicion = i + 1
-        nombre = user.get('alias', f"Usuario_{user.get('alias', 'Desconocido')}")
-        media_intentos = user.get('mediaIntentos', 0.0)
+            # Iconos para el TOP 3
+            if posicion == 1: icono = "🥇"
+            elif posicion == 2: icono = "🥈"
+            elif posicion == 3: icono = "🥉"
+            else: icono = f"{posicion}."
 
-        # Iconos para el TOP 3
-        if posicion == 1:
-            icono = "🥇"
-        elif posicion == 2:
-            icono = "🥈"
-        elif posicion == 3:
-            icono = "🥉"
-        else:
-            icono = f"{posicion}."
+            # Formateamos la media a 2 decimales
+            respuesta += f"{icono} *{nombre}* con `{media_intentos:.1f}` intentos por partida.\n"
 
-        # Formateamos la media a 2 decimales y usamos el formato solicitado
-        respuesta += f"{icono} *{nombre}* con media de `{media_intentos:.2f}` intentos por partida.\n"
+    # --- Añadir posición del jugador si NO está en el TOP 10 ---
+    if posicion_usuario > 0:
+        # Comprobamos si el usuario ya está listado en el TOP 10
+        if posicion_usuario > 10:
+            media_usuario = stats_usuario['mediaIntentos']
 
-    respuesta += "\n¡Usa /stats para ver tu posición!"
+            respuesta += "\n"
+            respuesta += f"⭐ ¡Tu posición actual es: *{posicion_usuario}*! ⭐\n"
+            respuesta += f"Tu media es: `{media_usuario:.1f}` aciertos por partida.\n"
+        elif posicion_usuario > 0 and posicion_usuario <= 10:
+            respuesta += "\n¡Felicidades, estás en el TOP 10! 🎉"
+    elif posicion_usuario == 0:
+        respuesta += "\n_(Necesitas al menos una victoria para aparecer en el ranking.)_"
 
     await update.message.reply_text(respuesta, parse_mode="Markdown")
+
+async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    message = """
+    🤖 *Bienvenido al OPDle Bot* 🏴‍☠️
+    
+    ¡Adivina el personaje secreto de One Piece en el menor número de intentos posible!
+    
+    *COMANDOS DISPONIBLES:*
+    
+    /start   - Arranca el bot y muestra el mensaje de bienvenida.
+    /play    - Selecciona un nuevo personaje aleatorio para adivinar y comienza una partida.
+    /guia    - Muestra ayuda detallada sobre la jugabilidad y cómo interpretar los resultados de las pistas.
+    /stats   - Muestra tus estadísticas personales de juego (Partidas jugadas, racha, media de aciertos).
+    /rank    - Muestra el ranking global de los 10 mejores jugadores por su media de aciertos (y tu posición).
+    /reset   - Reinicia tus estadísticas de juego a cero (requiere confirmación).
+    /help    - Muestra esta información sobre los comandos.
+    
+    _Recuerda usar el inline chat (poniendo el nombre del bot seguido de tu búsqueda) para ir obteniendo sugerencias._
+    """
+
+    await update.message.reply_text(message, parse_mode="Markdown")
 
 # =====================
 # INICIO DEL BOT
@@ -675,6 +687,7 @@ def main():
     app.add_handler(CommandHandler("guia", guia_comando))
     app.add_handler(CommandHandler("stats", stats))
     app.add_handler(CommandHandler("rank", rank))
+    app.add_handler(CommandHandler("help", help))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, intento))
     app.add_handler(InlineQueryHandler(inline_query_handler))
 

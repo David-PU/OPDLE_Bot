@@ -227,6 +227,57 @@ def obtener_ranking_global(limite: int = 10) -> List[Dict[str, Any]]:
         logger.error(f"Error al obtener el ranking global por media: {e}")
         return []
 
+def obtener_posicion_usuario(user_id: int) -> Dict[str, Any]:
+    global usuarios
+    if usuarios is None:
+        logger.error("❌ Colección 'usuarios' no inicializada.")
+        return {"posicion": 0}
+
+    try:
+        # Pipeline para obtener la media del usuario y compararla con el resto
+
+        # 1. Calcular la media del usuario actual
+        media_usuario = usuarios.aggregate([
+            {"$match": {"telegramId": user_id, "totalGamesWon": {"$gt": 0}}},
+            {"$addFields": {
+                "mediaIntentos": {"$divide": ["$totalGuesses", "$totalGamesWon"]}
+            }},
+            {"$project": {"mediaIntentos": 1, "alias": 1, "_id": 0}}
+        ]).next()
+
+        # Si el usuario no ha ganado o no existe, salimos
+        if not media_usuario:
+            return {"posicion": 0}
+
+        # Contar cuántos usuarios tienen una media de intentos MEJOR (menor) que la suya
+        media_a_comparar = media_usuario["mediaIntentos"]
+
+        conteo_mejores = usuarios.count_documents({
+            "totalGamesWon": {"$gt": 0},
+            "$expr": {
+                "$lt": [
+                    {"$divide": ["$totalGuesses", "$totalGamesWon"]},
+                    media_a_comparar
+                ]
+            }
+        })
+
+        # La posición es (número de jugadores con mejor media) + 1
+        posicion = conteo_mejores + 1
+
+        return {
+            "posicion": posicion,
+            "mediaIntentos": media_a_comparar,
+            "alias": media_usuario.get("alias", f"Usuario_{user_id}")
+        }
+
+    except StopIteration:
+        # Ocurre si el usuario no tiene victorias o no existe
+        return {"posicion": 0}
+    except Exception as e:
+        logger.error(f"Error al obtener la posición del usuario {user_id}: {e}")
+        return {"posicion": 0}
+
 def close_connection():
     global client
     if client:
